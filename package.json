@@ -30,7 +30,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "relsx": "./bin/relsx.js"
+    "relsx": "bin/relsx.js"
   },
   "files": [
     "bin",
