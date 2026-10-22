@@ -1,0 +1,19 @@
+# Package manager lockfiles
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lockb
+
+# Build outputs
+dist/
+build/
+out/
+.turbo/
+
+# Dependencies and caches
+node_modules/
+.pnpm-store/
+.cache/
+
+# Agents
+.agents/

@@ -1,0 +1,58 @@
+{
+  "name": "relsx",
+  "version": "0.0.1",
+  "description": "",
+  "keywords": [
+    "release",
+    "publish",
+    "npm",
+    "npmjs",
+    "relsx"
+  ],
+  "homepage": "https://github.com/dcdavidev/relsx#readme",
+  "bugs": {
+    "url": "https://github.com/dcdavidev/relsx/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dcdavidev/relsx.git"
+  },
+  "license": "MIT",
+  "author": "Davide Di Criscito <dcdavidev@gmail.com>",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "check": "pnpm run lint && pnpm run spellcheck && pnpm run test",
+    "check:ci": "pnpm run lint:check && pnpm run fmt:check && pnpm run spellcheck && pnpm run test",
+    "commit": "cz",
+    "commit:lint": "commitlint --from=HEAD~1",
+    "fmt": "prettier --ignore-unknown --write .",
+    "fmt:check": "prettier --ignore-unknown --check .",
+    "lint": "eslint --no-warn-ignored --fix .",
+    "lint:check": "eslint --no-warn-ignored .",
+    "prepare": "lefthook install",
+    "spellcheck": "cspell --no-progress --no-summary .",
+    "test": "node --test"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-git"
+    }
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@spellbookx/recipes": "^1.0.1",
+    "commitizen": "^4.3.2",
+    "commitlint-config-spellbookx": "^1.0.1",
+    "conventional-changelog-conventionalcommits": "^10.4.1",
+    "cspell": "^10.4.0",
+    "cspell-config-spellbookx": "^1.0.1",
+    "cz-git": "^1.14.0",
+    "eslint": "^10.13.0",
+    "eslint-plugin-spellbookx": "^1.0.1",
+    "lefthook": "^2.2.2",
+    "prettier": "^3.9.10",
+    "prettier-config-spellbookx": "^1.0.1"
+  },
+  "packageManager": "pnpm@12.14.0"
+}
