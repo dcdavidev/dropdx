@@ -56,11 +56,24 @@ export function bumpPackages(
     const regInfo = registryInfoMap.get(pkg.name);
     const regVersion = regInfo?.exists ? regInfo.latestVersion : undefined;
 
+    let isExistingGitTag = false;
+    try {
+      isExistingGitTag = Boolean(
+        exec(`git tag -l "v${pkg.version}"`, { cwd: pkg.directory })
+      );
+    } catch {
+      // Non-fatal
+    }
+
+    const shouldForceBump = Boolean(
+      isExistingGitTag || options.isForceBump || options.isExplicitBump
+    );
+
     const { targetVersion, bumpNeeded } = resolveTargetVersion(
       pkg.version,
       regVersion,
       options.bump,
-      Boolean(options.isForceBump)
+      shouldForceBump
     );
 
     versionBumps.push({
