@@ -92,6 +92,9 @@ export function commitChanges(
   if (options.dryRun) return;
 
   exec('git add .', { cwd: rootDir });
+  const status = exec('git status --porcelain', { cwd: rootDir });
+  if (!status.trim()) return;
+
   exec(`git commit -m "${message}"`, { cwd: rootDir });
 }
 
