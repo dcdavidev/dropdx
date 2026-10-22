@@ -2,7 +2,8 @@ const { defineConfig } = require('@cspell/cspell-types');
 
 module.exports = defineConfig({
   version: '0.2',
-  import: ['cspell-config-spellbookx'],
+  import: ['cspell-config-spellbookx', '@cspell/dict-it-it/cspell-ext.json'],
+  ignorePaths: ['.agents/**'],
   dictionaryDefinitions: [
     {
       name: 'project-custom-words',
@@ -10,5 +11,5 @@ module.exports = defineConfig({
       addWords: true,
     },
   ],
-  dictionaries: ['project-custom-words'],
+  dictionaries: ['project-custom-words', 'it-it'],
 });

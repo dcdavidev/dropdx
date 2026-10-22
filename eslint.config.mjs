@@ -6,5 +6,9 @@ export default defineConfig([
   spellbookx.configs.node,
   {
     ignores: ['.agents/**'],
+    rules: {
+      'no-process-exit': 'off',
+      'unicorn/no-process-exit': 'off',
+    },
   },
 ]);

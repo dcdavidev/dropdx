@@ -1,3 +1,14 @@
 spellbookx
 relsx
 ehthumbs
+changeset
+changesets
+semver
+npmjs
+pnpm
+whoami
+turborepo
+preid
+unpublished
+prerelease
+ENEEDAUTH

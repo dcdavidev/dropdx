@@ -1,7 +1,7 @@
 {
   "name": "relsx",
   "version": "0.0.1",
-  "description": "",
+  "description": "Automated release and publish CLI for single packages and monorepos",
   "keywords": [
     "release",
     "publish",
@@ -20,19 +20,36 @@
   "license": "MIT",
   "author": "Davide Di Criscito <dcdavidev@gmail.com>",
   "type": "module",
-  "main": "index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "relsx": "./bin/relsx.js"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
   "scripts": {
-    "check": "pnpm run lint && pnpm run spellcheck && pnpm run test",
-    "check:ci": "pnpm run lint:check && pnpm run fmt:check && pnpm run spellcheck && pnpm run test",
+    "build": "tsc",
+    "check": "pnpm run build && pnpm run lint && pnpm run spellcheck && pnpm run test",
+    "check:ci": "pnpm run build && pnpm run lint:check && pnpm run fmt:check && pnpm run spellcheck && pnpm run test",
     "commit": "cz",
     "commit:lint": "commitlint --from=HEAD~1",
     "fmt": "prettier --ignore-unknown --write .",
     "fmt:check": "prettier --ignore-unknown --check .",
     "lint": "eslint --no-warn-ignored --fix .",
     "lint:check": "eslint --no-warn-ignored .",
+    "prepack": "pnpm run build",
     "prepare": "lefthook install",
     "spellcheck": "cspell --no-progress --no-summary .",
-    "test": "node --test"
+    "test": "pnpm run build && node --test"
   },
   "config": {
     "commitizen": {
@@ -41,7 +58,10 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",
+    "@cspell/dict-it-it": "^3.1.7",
+    "@dcdavidev/tsconfig": "^0.1.0",
     "@spellbookx/recipes": "^1.0.1",
+    "@types/node": "^26.6.5",
     "commitizen": "^4.3.2",
     "commitlint-config-spellbookx": "^1.0.1",
     "conventional-changelog-conventionalcommits": "^10.4.1",
@@ -52,7 +72,8 @@
     "eslint-plugin-spellbookx": "^1.0.1",
     "lefthook": "^2.2.2",
     "prettier": "^3.9.10",
-    "prettier-config-spellbookx": "^1.0.1"
+    "prettier-config-spellbookx": "^1.0.1",
+    "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@12.14.0"
 }
