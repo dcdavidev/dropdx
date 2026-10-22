@@ -108,7 +108,7 @@ export function updateChangelog(
     commits ?? getConventionalCommits(getLatestTag(pkgDir), pkgDir);
 
   const bodyContent = formatConventionalChangelog(resolvedCommits, summary);
-  const entry = `## [${newVersion}] - ${dateStr}\n\n${bodyContent}\n\n`;
+  const entry = `## v${newVersion} - ${dateStr}\n\n${bodyContent}\n\n`;
 
   if (!existsSync(changelogPath)) {
     const content = `# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n${entry}`;
@@ -117,7 +117,10 @@ export function updateChangelog(
   }
 
   const existingContent = readFileSync(changelogPath, 'utf8');
-  if (existingContent.includes(`## [${newVersion}]`)) {
+  if (
+    existingContent.includes(`## v${newVersion}`) ||
+    existingContent.includes(`## [${newVersion}]`)
+  ) {
     // Version entry already exists in changelog
     return changelogPath;
   }
