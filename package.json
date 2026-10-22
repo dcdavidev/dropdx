@@ -1,5 +1,5 @@
 {
-  "name": "relsx",
+  "name": "@dcdavidev/relsx",
   "version": "0.0.1",
   "description": "Automated release and publish CLI for single packages and monorepos",
   "keywords": [
@@ -75,5 +75,8 @@
     "prettier-config-spellbookx": "^1.0.1",
     "typescript": "^5.9.3"
   },
-  "packageManager": "pnpm@12.14.0"
+  "packageManager": "pnpm@12.14.0",
+  "publishConfig": {
+    "access": "public"
+  }
 }

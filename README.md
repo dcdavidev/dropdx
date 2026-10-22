@@ -1,6 +1,6 @@
 # relsx 🧙‍♂️🚀
 
-[![npm version](https://img.shields.io/npm/v/relsx?color=a855f7&style=flat-square)](https://www.npmjs.com/package/relsx)
+[![npm version](https://img.shields.io/npm/v/@dcdavidev/relsx?color=a855f7&style=flat-square)](https://www.npmjs.com/package/@dcdavidev/relsx)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square)](LICENSE)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-9333ea.svg?style=flat-square)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-c084fc.svg?style=flat-square)](https://www.typescriptlang.org/)
@@ -63,26 +63,26 @@ You can run `relsx` on-demand using your preferred package runner, or install it
 
 ```bash
 # Using pnpm
-pnpm dlx relsx
+pnpm dlx @dcdavidev/relsx
 
 # Using npm
-npx relsx
+npx @dcdavidev/relsx
 
 # Using yarn
-yarn dlx relsx
+yarn dlx @dcdavidev/relsx
 ```
 
 ### Local Project Installation
 
 ```bash
 # Using pnpm
-pnpm add -D relsx
+pnpm add -D @dcdavidev/relsx
 
 # Using npm
-npm install --save-dev relsx
+npm install --save-dev @dcdavidev/relsx
 
 # Using yarn
-yarn add -D relsx
+yarn add -D @dcdavidev/relsx
 ```
 
 ---

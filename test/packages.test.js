@@ -16,7 +16,9 @@ describe('Package discovery and topological sort', () => {
   it('discovers the current project package as standalone', () => {
     const packages = findPackages(process.cwd());
     assert.ok(packages.length > 0);
-    const selfPkg = packages.find((p) => p.name === 'relsx');
+    const selfPkg = packages.find(
+      (p) => p.name === '@dcdavidev/relsx' || p.name === 'relsx'
+    );
     assert.ok(selfPkg);
     assert.equal(selfPkg.isPublishable, true);
   });
