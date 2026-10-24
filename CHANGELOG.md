@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.1 - 2026-10-24
+
+### 🔧 Maintenance & Chores
+
+- **workspace:** update spellbookx suite and add release script (db7714b)
+
 ## v0.2.0 - 2026-10-24
 
 ### ✨ Features
