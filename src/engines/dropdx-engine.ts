@@ -15,6 +15,7 @@ import type {
 } from '../types.js';
 import {
   bold,
+  cyan,
   dim,
   green,
   logError,
@@ -25,7 +26,21 @@ import {
 import { updateChangelog } from '../utils/changelog.js';
 import { exec, runInherited } from '../utils/exec.js';
 import { resolveRegistry } from '../utils/npmrc.js';
+import {
+  approveStagedPackage,
+  extractStageId,
+  fetchStagedPackageId,
+  isInteractiveTty,
+  isTwoFactorRequiredError,
+  promptOtpInteractive,
+} from '../utils/registry.js';
 import { resolveTargetVersion } from '../utils/semver.js';
+
+export interface PublishDependencies {
+  execFn?: typeof exec;
+  isInteractiveFn?: () => boolean;
+  promptOtpFn?: (pkgName: string, version: string) => string;
+}
 
 interface MutablePackageJson {
   version?: string;
@@ -190,22 +205,292 @@ export function buildPackages(
 }
 
 /**
- * Publishes packages to their designated registries.
+ * Builds the direct publish CLI command string for a workspace package.
+ *
+ * @param pkg - Workspace package.
+ * @param targetRegistry - Resolved registry URL.
+ * @param options - CLI options.
+ * @param rootDir - Workspace root directory.
+ * @param isPnpm - Whether pnpm lockfile is present.
+ * @returns Command string.
+ */
+export function buildPublishCommand(
+  pkg: WorkspacePackage,
+  targetRegistry: string,
+  options: CliOptions,
+  rootDir: string,
+  isPnpm: boolean
+): string {
+  const publishCmdParts: string[] = [];
+
+  if (isPnpm) {
+    publishCmdParts.push('pnpm');
+    if (pkg.directory !== rootDir) {
+      publishCmdParts.push(`--filter "${pkg.name}"`);
+    }
+    publishCmdParts.push('publish');
+  } else {
+    publishCmdParts.push('npm publish');
+  }
+
+  const pkgAccess =
+    (pkg.publishConfig.access as 'public' | 'restricted' | undefined) ||
+    options.access ||
+    'public';
+
+  publishCmdParts.push(
+    `--registry ${targetRegistry}`,
+    `--access ${pkgAccess}`,
+    '--no-git-checks',
+    `--tag ${options.tag || 'latest'}`
+  );
+
+  if (options.otp) {
+    publishCmdParts.push(`--otp ${options.otp}`);
+  }
+  if (options.provenance) {
+    publishCmdParts.push('--provenance');
+  }
+  if (options.dryRun) {
+    publishCmdParts.push('--dry-run');
+  }
+
+  return publishCmdParts.join(' ');
+}
+
+/**
+ * Builds the staged publish CLI command string (`npm stage publish` / `pnpm stage publish`)
+ * for deferring 2FA proof-of-presence to `npm stage approve`.
+ *
+ * @param pkg - Workspace package.
+ * @param targetRegistry - Resolved registry URL.
+ * @param options - CLI options.
+ * @param rootDir - Workspace root directory.
+ * @param isPnpm - Whether to use pnpm stage publish.
+ * @returns Command string.
+ */
+export function buildStagePublishCommand(
+  pkg: WorkspacePackage,
+  targetRegistry: string,
+  options: CliOptions,
+  rootDir: string,
+  isPnpm: boolean
+): string {
+  const stageCmdParts: string[] = [];
+
+  if (isPnpm) {
+    stageCmdParts.push('pnpm');
+    if (pkg.directory !== rootDir) {
+      stageCmdParts.push(`--filter "${pkg.name}"`);
+    }
+    stageCmdParts.push('stage publish');
+  } else {
+    stageCmdParts.push('npm stage publish');
+  }
+
+  const pkgAccess =
+    (pkg.publishConfig.access as 'public' | 'restricted' | undefined) ||
+    options.access ||
+    'public';
+
+  stageCmdParts.push(
+    `--registry ${targetRegistry}`,
+    `--access ${pkgAccess}`,
+    `--tag ${options.tag || 'latest'}`
+  );
+
+  if (isPnpm) {
+    stageCmdParts.push('--no-git-checks');
+  }
+  if (options.provenance) {
+    stageCmdParts.push('--provenance');
+  }
+  if (options.dryRun) {
+    stageCmdParts.push('--dry-run');
+  }
+
+  return stageCmdParts.join(' ');
+}
+
+/**
+ * Logs manual instructions for approving a staged package release with 2FA.
+ *
+ * @param pkgName - Package name.
+ * @param stageId - Optional stage ID if known.
+ * @param targetRegistry - Registry URL.
+ */
+function logManualStageApprovalInstructions(
+  pkgName: string,
+  stageId: string | undefined,
+  targetRegistry: string
+): void {
+  const message = stageId
+    ? `Staged release awaiting 2FA approval. Run: ${bold(cyan(`npm stage approve ${stageId} --registry ${targetRegistry}`))}`
+    : `Staged release awaiting 2FA approval. List and approve via: ${bold(cyan(`npm stage list "${pkgName}" --registry ${targetRegistry}`))} && ${bold(cyan(`npm stage approve <stage-id> --registry ${targetRegistry}`))}`;
+  logInfo(message);
+}
+
+/**
+ * Stages a package version via `npm stage publish` (or `pnpm stage publish`) and,
+ * if running in an interactive TTY or `--otp` is provided, approves the staged version.
+ *
+ * @param pkg - Workspace package.
+ * @param targetVersion - Target version string.
+ * @param targetRegistry - Resolved registry URL.
+ * @param options - CLI options.
+ * @param rootDir - Workspace root directory.
+ * @param isPnpm - Whether pnpm lockfile exists.
+ * @param deps - Injectable execution and prompt dependencies.
+ * @returns PublishResult for the staged package.
+ */
+function stageAndApprovePackage(
+  pkg: WorkspacePackage,
+  targetVersion: string,
+  targetRegistry: string,
+  options: CliOptions,
+  rootDir: string,
+  isPnpm: boolean,
+  deps: Required<PublishDependencies>
+): PublishResult {
+  const primaryStageCmd = buildStagePublishCommand(
+    pkg,
+    targetRegistry,
+    options,
+    rootDir,
+    isPnpm
+  );
+  logInfo(
+    `Staging ${bold(pkg.name)}@${bold(targetVersion)} on ${dim(targetRegistry)}...`
+  );
+  logInfo(`Command: ${dim(primaryStageCmd)}`);
+
+  let stageOutput: string;
+  try {
+    stageOutput = deps.execFn(primaryStageCmd, { cwd: pkg.directory });
+  } catch (stageError: unknown) {
+    // If an older pnpm version does not support `pnpm stage publish`, fall back to `npm stage publish`
+    if (isPnpm) {
+      const npmFallbackCmd = buildStagePublishCommand(
+        pkg,
+        targetRegistry,
+        options,
+        rootDir,
+        false
+      );
+      logInfo(`Fallback command: ${dim(npmFallbackCmd)}`);
+      stageOutput = deps.execFn(npmFallbackCmd, { cwd: pkg.directory });
+    } else {
+      throw stageError;
+    }
+  }
+
+  if (options.dryRun) {
+    logSuccess(
+      `[DRY-RUN] Simulated staging for ${bold(green(`${pkg.name}@${targetVersion}`))}`
+    );
+    return {
+      name: pkg.name,
+      version: targetVersion,
+      success: true,
+      staged: true,
+      registry: targetRegistry,
+    };
+  }
+
+  const stageId =
+    extractStageId(stageOutput) ??
+    fetchStagedPackageId(pkg.name, targetVersion, targetRegistry, deps.execFn);
+
+  const stageIdNotice = stageId ? ` (stage ID: ${bold(stageId)})` : '';
+  logSuccess(
+    `Staged ${bold(green(`${pkg.name}@${targetVersion}`))}${stageIdNotice}`
+  );
+
+  // Determine if we can approve immediately via --otp or interactive TTY prompt
+  let otpToUse = options.otp;
+  if (!otpToUse && stageId && deps.isInteractiveFn()) {
+    otpToUse = deps.promptOtpFn(pkg.name, targetVersion);
+  }
+
+  if (stageId && otpToUse) {
+    logInfo(
+      `Approving staged package ${bold(pkg.name)}@${bold(targetVersion)} (${dim(stageId)})...`
+    );
+    try {
+      approveStagedPackage(
+        stageId,
+        targetRegistry,
+        otpToUse,
+        pkg.directory,
+        deps.execFn
+      );
+      logSuccess(
+        `Approved and published ${bold(green(`${pkg.name}@${targetVersion}`))}`
+      );
+      return {
+        name: pkg.name,
+        version: targetVersion,
+        success: true,
+        staged: true,
+        approved: true,
+        stageId,
+        registry: targetRegistry,
+      };
+    } catch (approveError: unknown) {
+      const err = approveError as Error;
+      logWarn(
+        `Could not auto-approve staged package ${pkg.name}@${targetVersion}: ${err.message}`
+      );
+      logManualStageApprovalInstructions(pkg.name, stageId, targetRegistry);
+      return {
+        name: pkg.name,
+        version: targetVersion,
+        success: true,
+        staged: true,
+        approved: false,
+        stageId,
+        registry: targetRegistry,
+      };
+    }
+  }
+
+  logManualStageApprovalInstructions(pkg.name, stageId, targetRegistry);
+  return {
+    name: pkg.name,
+    version: targetVersion,
+    success: true,
+    staged: true,
+    approved: false,
+    stageId,
+    registry: targetRegistry,
+  };
+}
+
+/**
+ * Publishes packages to their designated registries, with support for explicit staged
+ * publishing (`--stage`) and automatic fallback to `npm stage publish` when 2FA/EOTP is required.
  *
  * @param packages - Publishable packages.
  * @param updatedVersionsMap - Name to new version map.
  * @param options - CLI options.
  * @param rootDir - Root directory.
+ * @param customDeps - Optional injectable dependencies for testing.
  * @returns Publish results list.
  */
 export function publishPackages(
   packages: WorkspacePackage[],
   updatedVersionsMap: Map<string, string>,
   options: CliOptions,
-  rootDir: string
+  rootDir: string,
+  customDeps: PublishDependencies = {}
 ): PublishResult[] {
   const isPnpm = existsSync(path.join(rootDir, 'pnpm-lock.yaml'));
   const results: PublishResult[] = [];
+  const deps: Required<PublishDependencies> = {
+    execFn: customDeps.execFn ?? exec,
+    isInteractiveFn: customDeps.isInteractiveFn ?? isInteractiveTty,
+    promptOtpFn: customDeps.promptOtpFn ?? promptOtpInteractive,
+  };
 
   for (const pkg of packages) {
     const targetVersion = updatedVersionsMap.get(pkg.name) || pkg.version;
@@ -222,49 +507,55 @@ export function publishPackages(
         version: targetVersion,
         success: true,
         reason: 'skipped',
+        registry: targetRegistry,
       });
       continue;
     }
 
-    const publishCmdParts: string[] = [];
-
-    if (isPnpm) {
-      publishCmdParts.push('pnpm');
-      if (pkg.directory !== rootDir) {
-        publishCmdParts.push(`--filter "${pkg.name}"`);
+    if (options.stage) {
+      try {
+        const stageResult = stageAndApprovePackage(
+          pkg,
+          targetVersion,
+          targetRegistry,
+          options,
+          rootDir,
+          isPnpm,
+          deps
+        );
+        results.push(stageResult);
+      } catch (error: unknown) {
+        const err = error as Error;
+        logError(
+          `Failed to stage ${pkg.name}@${targetVersion}: ${err.message}`
+        );
+        results.push({
+          name: pkg.name,
+          version: targetVersion,
+          success: false,
+          staged: true,
+          reason: err.message,
+          registry: targetRegistry,
+        });
+        if (!options.dryRun) {
+          logError('Halting remaining package publishing due to failure.');
+          break;
+        }
       }
-      publishCmdParts.push('publish');
-    } else {
-      publishCmdParts.push('npm publish');
+      continue;
     }
 
-    const pkgAccess =
-      (pkg.publishConfig.access as 'public' | 'restricted' | undefined) ||
-      options.access ||
-      'public';
-
-    publishCmdParts.push(
-      `--registry ${targetRegistry}`,
-      `--access ${pkgAccess}`,
-      '--no-git-checks',
-      `--tag ${options.tag || 'latest'}`
+    const publishCmd = buildPublishCommand(
+      pkg,
+      targetRegistry,
+      options,
+      rootDir,
+      isPnpm
     );
-
-    if (options.otp) {
-      publishCmdParts.push(`--otp ${options.otp}`);
-    }
-    if (options.provenance) {
-      publishCmdParts.push('--provenance');
-    }
-    if (options.dryRun) {
-      publishCmdParts.push('--dry-run');
-    }
-
-    const publishCmd = publishCmdParts.join(' ');
     logInfo(`Command: ${dim(publishCmd)}`);
 
     try {
-      exec(publishCmd, { stdio: 'inherit', cwd: pkg.directory });
+      deps.execFn(publishCmd, { cwd: pkg.directory });
       logSuccess(
         `Successfully published ${bold(green(`${pkg.name}@${targetVersion}`))}`
       );
@@ -272,9 +563,48 @@ export function publishPackages(
         name: pkg.name,
         version: targetVersion,
         success: true,
+        registry: targetRegistry,
       });
     } catch (error: unknown) {
       const err = error as Error;
+
+      if (isTwoFactorRequiredError(err.message)) {
+        logWarn(
+          `Direct publish for ${bold(`${pkg.name}@${targetVersion}`)} requires Two-Factor Authentication (2FA/EOTP). Falling back to staged publishing (https://docs.npmjs.com/staged-publishing)...`
+        );
+        try {
+          const stageResult = stageAndApprovePackage(
+            pkg,
+            targetVersion,
+            targetRegistry,
+            options,
+            rootDir,
+            isPnpm,
+            deps
+          );
+          results.push(stageResult);
+          continue;
+        } catch (stageError: unknown) {
+          const stageErr = stageError as Error;
+          logError(
+            `Staged publish fallback also failed for ${pkg.name}@${targetVersion}: ${stageErr.message}`
+          );
+          results.push({
+            name: pkg.name,
+            version: targetVersion,
+            success: false,
+            staged: true,
+            reason: stageErr.message,
+            registry: targetRegistry,
+          });
+          if (!options.dryRun) {
+            logError('Halting remaining package publishing due to failure.');
+            break;
+          }
+          continue;
+        }
+      }
+
       logError(
         `Failed to publish ${pkg.name}@${targetVersion}: ${err.message}`
       );
@@ -283,6 +613,7 @@ export function publishPackages(
         version: targetVersion,
         success: false,
         reason: err.message,
+        registry: targetRegistry,
       });
 
       if (!options.dryRun) {

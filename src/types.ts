@@ -29,6 +29,7 @@ export interface DropdxConfig {
   skipPublish?: boolean;
   allowDirty?: boolean;
   provenance?: boolean;
+  stage?: boolean;
   forceBump?: boolean;
   summary?: string;
 }
@@ -42,6 +43,7 @@ export interface CliOptions {
   tag: string;
   access: AccessType;
   otp?: string;
+  stage: boolean;
   skipBuild: boolean;
   skipGit: boolean;
   skipPublish: boolean;
@@ -95,6 +97,10 @@ export interface PublishResult {
   version: string;
   success: boolean;
   reason?: string;
+  staged?: boolean;
+  approved?: boolean;
+  stageId?: string;
+  registry?: string;
 }
 
 export interface TargetVersionResult {

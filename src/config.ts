@@ -49,6 +49,7 @@ export const DEFAULT_OPTIONS: CliOptions = {
   tag: 'latest',
   access: 'public',
   otp: undefined,
+  stage: false,
   skipBuild: false,
   skipGit: false,
   skipPublish: false,
@@ -143,6 +144,9 @@ function applyConfigToOptions(
   }
   if (config.provenance !== undefined) {
     options.provenance = Boolean(config.provenance);
+  }
+  if (config.stage !== undefined) {
+    options.stage = Boolean(config.stage);
   }
   if (config.forceBump !== undefined) {
     options.isForceBump = Boolean(config.forceBump);
@@ -272,6 +276,14 @@ function handleArg(options: CliOptions, argv: string[], index: number): number {
     }
     case '--provenance': {
       options.provenance = true;
+      return index + 1;
+    }
+    case '--stage': {
+      options.stage = true;
+      return index + 1;
+    }
+    case '--no-stage': {
+      options.stage = false;
       return index + 1;
     }
     case '--force-bump': {

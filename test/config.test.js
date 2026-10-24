@@ -52,13 +52,24 @@ describe('.config/dropdx.config.* loader, multi-format parsers, and precedence',
       assert.equal(fromConfigOnly.tag, 'latest');
 
       const withCliOverrides = parseArgs(
-        ['--tag', 'next', '--engine', 'changeset', '--conventional-commits'],
+        [
+          '--tag',
+          'next',
+          '--engine',
+          'changeset',
+          '--conventional-commits',
+          '--stage',
+        ],
         tmpDir
       );
       assert.equal(withCliOverrides.tag, 'next');
       assert.equal(withCliOverrides.engine, 'changeset');
       assert.equal(withCliOverrides.conventionalCommits, true);
+      assert.equal(withCliOverrides.stage, true);
       assert.equal(withCliOverrides.skipBuild, true);
+
+      const withNoStageOverride = parseArgs(['--no-stage'], tmpDir);
+      assert.equal(withNoStageOverride.stage, false);
     } finally {
       rmSync(tmpDir, { recursive: true, force: true });
     }

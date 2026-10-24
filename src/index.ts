@@ -11,6 +11,11 @@ export {
   loadConfigFile,
   parseArgs,
 } from './config.js';
+export {
+  buildPublishCommand,
+  buildStagePublishCommand,
+  publishPackages,
+} from './engines/dropdx-engine.js';
 export { detectEngine, SUPPORTED_ENGINES } from './engines/index.js';
 export * from './types.js';
 export {
@@ -36,7 +41,16 @@ export {
 } from './utils/git.js';
 export { resolveRegistry } from './utils/npmrc.js';
 export { findPackages, sortPackagesTopologically } from './utils/packages.js';
-export { checkNpmWhoami, fetchNpmRegistryInfo } from './utils/registry.js';
+export {
+  approveStagedPackage,
+  checkNpmWhoami,
+  extractStageId,
+  fetchNpmRegistryInfo,
+  fetchStagedPackageId,
+  isInteractiveTty,
+  isTwoFactorRequiredError,
+  promptOtpInteractive,
+} from './utils/registry.js';
 export {
   bumpVersion,
   compareSemVer,

@@ -30,8 +30,10 @@ export function exec(cmd: string, options: ExecOptions = {}): string {
     return res ? res.trim() : '';
   } catch (error: unknown) {
     const err = error as { stderr?: Buffer; stdout?: Buffer; message: string };
-    const message =
-      err.stderr?.toString() || err.stdout?.toString() || err.message;
+    const stderr = err.stderr?.toString().trim() || '';
+    const stdout = err.stdout?.toString().trim() || '';
+    const combined = [stderr, stdout].filter(Boolean).join('\n');
+    const message = combined || err.message;
     throw new Error(`Command failed: ${cmd}\n${message}`, { cause: error });
   }
 }

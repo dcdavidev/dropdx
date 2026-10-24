@@ -15,6 +15,7 @@ preid
 unpublished
 prerelease
 ENEEDAUTH
+EOTP
 bumpp
 releaserc
 versionrc

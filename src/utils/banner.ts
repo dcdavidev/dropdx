@@ -123,6 +123,7 @@ ${purple(bold('Opzioni Registry & Pubblicazione:'))}
   ${cyan('--tag <name>')}                  npm dist-tag (default: latest)
   ${cyan('--access <public|restricted>')}  Livello di accesso npm (default: public)
   ${cyan('--otp <code>')}                  Codice 2FA One-Time Password per npm
+  ${cyan('--stage')}                       Pubblica in staging queue npm (deferring 2FA a npm stage approve)
   ${cyan('--provenance')}                  Genera provenance attestation (utile in CI)
 
 ${purple(bold('Opzioni Engine & Workflow:'))}
@@ -138,6 +139,32 @@ ${purple(bold('Informazioni Generali:'))}
   ${cyan('-h, --help')}                    Mostra questo messaggio di aiuto
   ${cyan('-v, --version')}                 Mostra la versione di dropdx
 `);
+}
+
+/**
+ * Formats the display status for a single package publish outcome.
+ *
+ * @param res - Package publish result.
+ * @param isDryRun - Whether dry-run mode is active.
+ * @returns Colored status string.
+ */
+function formatPublishStatus(res: PublishResult, isDryRun?: boolean): string {
+  if (!res.success) {
+    return red(`FAILED (${res.reason || 'unknown'})`);
+  }
+  if (isDryRun) {
+    return yellow(
+      res.staged ? 'SIMULATED STAGE (dry-run)' : 'SIMULATED (dry-run)'
+    );
+  }
+  if (res.staged) {
+    if (res.approved) {
+      return green('PUBLISHED (staged & approved)');
+    }
+    const idSuffix = res.stageId ? `: ${res.stageId}` : '';
+    return cyan(`STAGED (pending 2FA${idSuffix})`);
+  }
+  return green('PUBLISHED');
 }
 
 /**
@@ -168,19 +195,38 @@ export function logTable(
   console.log(`  ${dim('─'.repeat(65))}`);
 
   for (const res of results) {
-    const statusText = res.success
-      ? options.dryRun
-        ? yellow('SIMULATED (dry-run)')
-        : green('PUBLISHED')
-      : red(`FAILED (${res.reason || 'unknown'})`);
+    const statusText = formatPublishStatus(res, options.dryRun);
     console.log(
       `  ${res.name.padEnd(35)} v${res.version.padEnd(13)} ${statusText}`
     );
   }
 
+  const pendingStaged = results.filter(
+    (r) => r.success && r.staged && !r.approved && !options.dryRun
+  );
+  if (pendingStaged.length > 0) {
+    console.log(
+      `\n  ${cyan(bold('🔐 Staged Publishing — Pending 2FA Approval (https://docs.npmjs.com/staged-publishing):'))}`
+    );
+    for (const stagedPkg of pendingStaged) {
+      const regFlag = stagedPkg.registry
+        ? ` --registry ${stagedPkg.registry}`
+        : '';
+      const cmdHint = stagedPkg.stageId
+        ? cyan(`npm stage approve ${stagedPkg.stageId}${regFlag}`)
+        : `${cyan(`npm stage list "${stagedPkg.name}"${regFlag}`)} ${dim('->')} ${cyan(`npm stage approve <stage-id>${regFlag}`)}`;
+      console.log(`    ${dim('•')} ${bold(stagedPkg.name)}: ${cmdHint}`);
+    }
+  }
+
   const isAllSucceeded = results.length > 0 && results.every((r) => r.success);
   if (isAllSucceeded) {
-    const actionWord = options.dryRun ? 'simulated' : 'published';
+    let actionWord = 'published';
+    if (options.dryRun) {
+      actionWord = 'simulated';
+    } else if (pendingStaged.length > 0) {
+      actionWord = 'staged';
+    }
     const tagInfo = options.tag ? ` at tag ${options.tag}` : '';
     console.log(
       `\n${green(bold(`🎉 All packages ${actionWord} successfully${tagInfo}! 🧙✨`))}\n`

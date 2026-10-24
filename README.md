@@ -135,29 +135,30 @@ Usage:
 
 ### Options Table
 
-| Option             | Shorthand | Description                                                     | Default                      |
-| :----------------- | :-------- | :-------------------------------------------------------------- | :--------------------------- |
-| `--bump <type>`    |           | SemVer increment level: `patch`, `minor`, `major`, `prerelease` | `patch`                      |
-| `--patch`          |           | Shortcut for `--bump patch`                                     |                              |
-| `--minor`          |           | Shortcut for `--bump minor`                                     |                              |
-| `--major`          |           | Shortcut for `--bump major`                                     |                              |
-| `--prerelease`     |           | Shortcut for `--bump prerelease`                                |                              |
-| `--force-bump`     |           | Force version bump even when local version > registry version   | `false`                      |
-| `--summary <text>` | `-m`      | Release summary note (used in commit message & changelog)       | Auto-generated               |
-| `--registry <url>` |           | Target npm registry URL                                         | From `.npmrc` or npmjs.org   |
-| `--tag <name>`     |           | npm dist-tag (e.g., `latest`, `beta`, `next`)                   | `latest`                     |
-| `--access <level>` |           | Package access level: `public` or `restricted`                  | `public`                     |
-| `--otp <code>`     |           | Two-factor authentication (2FA) one-time password               |                              |
-| `--provenance`     |           | Generate npm provenance attestation (useful in CI)              | `false`                      |
-| `--config <path>`  | `-c`      | Path to configuration file                                      | `.config/dropdx.config.json` |
-| `--engine <name>`  |           | Release engine: `auto`, `changeset`, `release-it`, `internal`   | `auto`                       |
-| `--dry-run`        | `-d`      | Simulate validations, bumps, build, and publish without changes | `false`                      |
-| `--skip-build`     |           | Skip running package build scripts                              | `false`                      |
-| `--skip-git`       |           | Skip git commit, tag, and push steps                            | `false`                      |
-| `--skip-publish`   |           | Skip publishing packages to the registry                        | `false`                      |
-| `--allow-dirty`    |           | Allow release even with uncommitted changes in git repository   | `false`                      |
-| `--help`           | `-h`      | Display help screen                                             |                              |
-| `--version`        | `-v`      | Display `dropdx` version                                        |                              |
+| Option             | Shorthand | Description                                                     | Default                        |
+| :----------------- | :-------- | :-------------------------------------------------------------- | :----------------------------- |
+| `--bump <type>`    |           | SemVer increment level: `patch`, `minor`, `major`, `prerelease` | `patch`                        |
+| `--patch`          |           | Shortcut for `--bump patch`                                     |                                |
+| `--minor`          |           | Shortcut for `--bump minor`                                     |                                |
+| `--major`          |           | Shortcut for `--bump major`                                     |                                |
+| `--prerelease`     |           | Shortcut for `--bump prerelease`                                |                                |
+| `--force-bump`     |           | Force version bump even when local version > registry version   | `false`                        |
+| `--summary <text>` | `-m`      | Release summary note (used in commit message & changelog)       | Auto-generated                 |
+| `--registry <url>` |           | Target npm registry URL                                         | From `.npmrc` or npmjs.org     |
+| `--tag <name>`     |           | npm dist-tag (e.g., `latest`, `beta`, `next`)                   | `latest`                       |
+| `--access <level>` |           | Package access level: `public` or `restricted`                  | `public`                       |
+| `--otp <code>`     |           | Two-factor authentication (2FA) one-time password               |                                |
+| `--stage`          |           | Stage package release (`npm stage publish`) for 2FA approval    | `false` (auto-fallback on 2FA) |
+| `--provenance`     |           | Generate npm provenance attestation (useful in CI)              | `false`                        |
+| `--config <path>`  | `-c`      | Path to configuration file                                      | `.config/dropdx.config.json`   |
+| `--engine <name>`  |           | Release engine: `auto`, `changeset`, `release-it`, `internal`   | `auto`                         |
+| `--dry-run`        | `-d`      | Simulate validations, bumps, build, and publish without changes | `false`                        |
+| `--skip-build`     |           | Skip running package build scripts                              | `false`                        |
+| `--skip-git`       |           | Skip git commit, tag, and push steps                            | `false`                        |
+| `--skip-publish`   |           | Skip publishing packages to the registry                        | `false`                        |
+| `--allow-dirty`    |           | Allow release even with uncommitted changes in git repository   | `false`                        |
+| `--help`           | `-h`      | Display help screen                                             |                                |
+| `--version`        | `-v`      | Display `dropdx` version                                        |                                |
 
 ---
 

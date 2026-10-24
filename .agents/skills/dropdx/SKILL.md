@@ -54,6 +54,7 @@ npx @dcdavidev/dropdx [options]
 | **Publish to a specific dist-tag (e.g. `beta`, `next`)** | `pnpm exec dropdx --prerelease --tag next`            |
 | **Publish to a custom registry URL**                     | `pnpm exec dropdx --registry https://npm.my-org.com/` |
 | **Publish with 2FA One-Time Password (OTP)**             | `pnpm exec dropdx --otp 123456`                       |
+| **Stage publish for 2FA approval (`npm stage publish`)** | `pnpm exec dropdx --stage`                            |
 | **Publish in CI with npm provenance attestation**        | `pnpm exec dropdx --provenance`                       |
 | **Force built-in engine (bypass Changesets/Release-It)** | `pnpm exec dropdx --engine internal`                  |
 | **Bump & build locally without git or npm publish**      | `pnpm exec dropdx --skip-git --skip-publish`          |
@@ -73,6 +74,7 @@ npx @dcdavidev/dropdx [options]
 | `--tag <name>`     |           | npm distribution tag (e.g., `latest`, `beta`, `next`)                     | `latest`                     |
 | `--access <level>` |           | Package access level: `public` or `restricted`                            | `public`                     |
 | `--otp <code>`     |           | Two-factor authentication (2FA) one-time password                         |                              |
+| `--stage`          |           | Stage release via `npm stage publish` (auto-fallback when 2FA required)   | `false`                      |
 | `--provenance`     |           | Generate npm provenance attestation (enabled automatically in GH Actions) | `false` (`true` in GHA)      |
 | `--config <path>`  | `-c`      | Path to configuration file                                                | `.config/dropdx.config.json` |
 | `--engine <name>`  |           | Release engine: `auto`, `changeset`, `release-it`, `internal`             | `auto`                       |
@@ -115,7 +117,8 @@ When invoked, `dropdx` executes a deterministic 7-step release pipeline:
    - Pushes the branch and annotated tag to `origin` (unless `--skip-git` or `--dry-run` is active).
 7. **`[7/7]` Publishing Packages to Registry**:
    - Publishes each package in topological order using `pnpm publish` or `npm publish` with `--registry`, `--access`, `--no-git-checks`, `--tag`, and optional `--otp` / `--provenance` / `--dry-run`.
-   - Prints a final summary table of published packages and versions.
+   - When `--stage` (`stage: true` in config) is passed, or when direct publishing fails due to a Two-Factor Authentication (`EOTP` / 2FA) requirement, `dropdx` stages the release via `npm stage publish` / `pnpm stage publish`. In interactive TTY environments, `dropdx` prompts for an OTP and runs `npm stage approve <stage-id>` automatically; in CI/non-TTY environments, it prints the `npm stage approve` command for human approval.
+   - Prints a final summary table of published/staged packages and versions.
 
 ---
 

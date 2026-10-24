@@ -1,10 +1,14 @@
 /**
  * @file src/utils/registry.ts
- * NPM Registry interaction, authentication checks (npm whoami), and package metadata.
+ * NPM Registry interaction, authentication checks (npm whoami), package metadata,
+ * and staged publishing / 2FA helpers.
  */
 
+import { readSync } from 'node:fs';
+import process from 'node:process';
+
 import type { NpmRegistryInfo } from '../types.js';
-import { bold, dim, red, yellow } from './colors.js';
+import { bold, cyan, dim, red, yellow } from './colors.js';
 import { exec } from './exec.js';
 
 /**
@@ -112,4 +116,192 @@ export async function fetchNpmRegistryInfo(
       return { exists: false, isUnpublished: false, maintainers: [] };
     }
   }
+}
+
+/**
+ * Determines whether a publish failure message indicates that Two-Factor Authentication (2FA/OTP)
+ * or staged publishing is required by the npm registry.
+ *
+ * @param errorMessage - Error output from `npm publish` or `pnpm publish`.
+ * @returns True if the failure is caused by a 2FA / OTP / stage-only requirement.
+ */
+export function isTwoFactorRequiredError(errorMessage: string): boolean {
+  if (!errorMessage) {
+    return false;
+  }
+
+  const patterns = [
+    /\beotp\b/i,
+    /one-time pass(?:word)?/i,
+    /two-factor authentication/i,
+    /\b2fa\b/i,
+    /--otp\b/i,
+    /disallow tokens/i,
+    /stage[- ]only/i,
+    /only allowed to stage/i,
+    /allow-stage-publish/i,
+  ];
+
+  return patterns.some((pattern) => pattern.test(errorMessage));
+}
+
+/**
+ * Extracts a stage ID from the stdout/stderr of `npm stage publish` or `pnpm stage publish`.
+ *
+ * @param output - Command output string.
+ * @returns Extracted stage ID, if present.
+ */
+export function extractStageId(output: string): string | undefined {
+  if (!output) {
+    return undefined;
+  }
+
+  // Matches: "+ pkg@1.0.0 (staged with id 12345678-1234-1234-1234-123456789abc)"
+  const stagedWithIdMatch = /staged with id\s+([0-9a-zA-Z_-]{8,})/i.exec(
+    output
+  );
+  if (stagedWithIdMatch?.[1]) {
+    return stagedWithIdMatch[1];
+  }
+
+  // Matches JSON field: "stageId": "..."
+  const jsonStageIdMatch = /"stageId"\s*:\s*"([^"]+)"/i.exec(output);
+  if (jsonStageIdMatch?.[1]) {
+    return jsonStageIdMatch[1];
+  }
+
+  // Matches UUID formatted stage id labels: "stage id: <uuid>" or "stage-id: <uuid>"
+  const uuidLabelMatch =
+    /stage[-_\s]?id\s*[:=]\s*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i.exec(
+      output
+    );
+  return uuidLabelMatch?.[1];
+}
+
+/**
+ * Queries `npm stage list` in JSON mode to find the stage ID for a staged package version.
+ *
+ * @param pkgName - Target npm package identifier.
+ * @param version - Staged SemVer version string.
+ * @param registry - Target npm registry URL.
+ * @param execFn - Command execution function (injectable for testing).
+ * @returns Stage ID if found.
+ */
+export function fetchStagedPackageId(
+  pkgName: string,
+  version: string,
+  registry: string,
+  execFn: typeof exec = exec
+): string | undefined {
+  try {
+    const raw = execFn(
+      `npm stage list "${pkgName}" --json --registry ${registry}`
+    );
+    if (!raw) {
+      return undefined;
+    }
+
+    const parsed = JSON.parse(raw) as unknown;
+    const items = Array.isArray(parsed)
+      ? (parsed as Array<{
+          id?: string;
+          stageId?: string;
+          packageName?: string;
+          name?: string;
+          version?: string;
+        }>)
+      : [];
+
+    const matchingVersion = items.find(
+      (item) =>
+        item.version === version &&
+        (!item.packageName || item.packageName === pkgName) &&
+        (!item.name || item.name === pkgName)
+    );
+
+    if (matchingVersion) {
+      return matchingVersion.id || matchingVersion.stageId;
+    }
+
+    const first = items[0];
+    return first?.id || first?.stageId;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Checks whether the current process is running in an interactive TTY terminal
+ * where the user can be prompted for a 2FA OTP code.
+ *
+ * @returns True if interactive TTY and not CI.
+ */
+export function isInteractiveTty(): boolean {
+  return Boolean(
+    process.stdin.isTTY &&
+    process.stdout.isTTY &&
+    !process.env.CI &&
+    !process.env.GITHUB_ACTIONS
+  );
+}
+
+/**
+ * Prompts the user synchronously in a TTY terminal for a 2FA One-Time Password (OTP)
+ * to approve a staged package release.
+ *
+ * @param pkgName - Package name.
+ * @param version - Package version.
+ * @returns Trimmed OTP string (empty string if user skipped).
+ */
+export function promptOtpInteractive(pkgName: string, version: string): string {
+  process.stdout.write(
+    `  ${cyan('🔐')} Enter 2FA OTP to approve staged ${bold(`${pkgName}@${version}`)} ${dim('(press Enter to skip and approve later)')}: `
+  );
+
+  const chunks: Buffer[] = [];
+  const buf = Buffer.alloc(1);
+
+  try {
+    while (true) {
+      const bytesRead = readSync(process.stdin.fd, buf, 0, 1, null);
+      if (bytesRead === 0) {
+        break;
+      }
+      const char = buf.toString('utf8');
+      if (char === '\n') {
+        break;
+      }
+      if (char !== '\r') {
+        chunks.push(Buffer.from(buf));
+      }
+    }
+  } catch {
+    return '';
+  }
+
+  return Buffer.concat(chunks).toString('utf8').trim();
+}
+
+/**
+ * Approves a staged package release on the npm registry using `npm stage approve`.
+ *
+ * @param stageId - Staged release identifier.
+ * @param registry - Target npm registry URL.
+ * @param otp - Optional 2FA one-time password.
+ * @param cwd - Working directory.
+ * @param execFn - Command execution function (injectable for testing).
+ * @returns Command output.
+ */
+export function approveStagedPackage(
+  stageId: string,
+  registry: string,
+  otp?: string,
+  cwd?: string,
+  execFn: typeof exec = exec
+): string {
+  const args = ['npm stage approve', stageId, `--registry ${registry}`];
+  if (otp) {
+    args.push(`--otp ${otp}`);
+  }
+  return execFn(args.join(' '), { cwd });
 }
