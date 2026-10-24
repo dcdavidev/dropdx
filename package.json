@@ -1,6 +1,6 @@
 {
   "name": "dropx",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Automated release and publish CLI for single packages and monorepos",
   "keywords": [
     "release",

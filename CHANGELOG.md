@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.0 - 2026-10-24
+
+### ✨ Features
+
+- **dropx:** rename package to dropx and add agent skills (c994edb)
+
 ## v0.0.2 - 2026-10-22
 
 ### 🐛 Bug Fixes
