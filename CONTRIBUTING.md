@@ -1,6 +1,6 @@
-# Contributing to dropx 🧙‍♂️✨
+# Contributing to dropdx 🧙‍♂️✨
 
-Thank you for your interest in contributing to **dropx**! We welcome contributions of all kinds, including bug reports, feature suggestions, documentation improvements, and pull requests.
+Thank you for your interest in contributing to **dropdx**! We welcome contributions of all kinds, including bug reports, feature suggestions, documentation improvements, and pull requests.
 
 Please take a few moments to review these guidelines before getting started.
 
@@ -23,8 +23,8 @@ We are dedicated to providing a friendly, safe, and welcoming environment for ev
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/dcdavidev/dropx.git
-cd dropx
+git clone https://github.com/dcdavidev/dropdx.git
+cd dropdx
 ```
 
 ### 2. Install Dependencies

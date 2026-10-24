@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: 💬 GitHub Discussions
-    url: https://github.com/dcdavidev/dropx/discussions
+    url: https://github.com/dcdavidev/dropdx/discussions
     about: Ask questions, discuss release workflows, or share ideas with the community.
   - name: 🛡️ Security Vulnerability Reporting
-    url: https://github.com/dcdavidev/dropx/security/advisories/new
+    url: https://github.com/dcdavidev/dropdx/security/advisories/new
     about: Privately report a suspected security vulnerability.

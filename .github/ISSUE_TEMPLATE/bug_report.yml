@@ -1,5 +1,5 @@
 name: 🐛 Bug Report
-description: Create a report to help us fix a bug or unexpected behavior in dropx
+description: Create a report to help us fix a bug or unexpected behavior in dropdx
 title: 'fix: '
 labels: ['bug', 'triage']
 body:
@@ -21,7 +21,7 @@ body:
       label: Steps to Reproduce
       description: What steps did you take before encountering the issue?
       placeholder: |
-        1. Run `dropx --dry-run`
+        1. Run `dropdx --dry-run`
         2. Inspect output...
     validations:
       required: true
@@ -61,11 +61,11 @@ body:
     validations:
       required: true
   - type: input
-    id: dropx-version
+    id: dropdx-version
     attributes:
-      label: dropx Version
-      description: Output of `dropx --version`
-      placeholder: e.g. 0.0.1
+      label: dropdx Version
+      description: Output of `dropdx --version`
+      placeholder: e.g. 0.1.0
     validations:
       required: true
   - type: input

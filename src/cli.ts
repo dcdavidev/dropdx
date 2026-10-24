@@ -1,6 +1,6 @@
 /**
  * @file src/cli.ts
- * CLI orchestrator for dropx automated release pipeline.
+ * CLI orchestrator for dropdx automated release pipeline.
  */
 
 import { readFileSync } from 'node:fs';
@@ -14,7 +14,7 @@ import {
   buildPackages,
   bumpPackages,
   publishPackages,
-} from './engines/dropx-engine.js';
+} from './engines/dropdx-engine.js';
 import { detectEngine } from './engines/index.js';
 import { runReleaseIt } from './engines/release-it.js';
 import type {
@@ -51,11 +51,11 @@ import { checkNpmWhoami, fetchNpmRegistryInfo } from './utils/registry.js';
 import { isSemVerGreaterThan } from './utils/semver.js';
 
 /**
- * Returns package.json version of dropx itself.
+ * Returns package.json version of dropdx itself.
  *
  * @returns Version string.
  */
-function getDropxVersion(): string {
+function getDropdxVersion(): string {
   try {
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const pkgPath = path.join(__dirname, '..', 'package.json');
@@ -87,7 +87,7 @@ function hasOwnershipAccess(
 }
 
 /**
- * Executes the full dropx release pipeline.
+ * Executes the full dropdx release pipeline.
  *
  * @param argv - Process CLI arguments.
  */
@@ -102,7 +102,7 @@ export async function cli(
   }
 
   if (options.version) {
-    console.log(`dropx v${getDropxVersion()}`);
+    console.log(`dropdx v${getDropdxVersion()}`);
     return;
   }
 

@@ -1,5 +1,5 @@
 {
-  "name": "dropx",
+  "name": "dropdx",
   "version": "0.1.0",
   "description": "Automated release and publish CLI for single packages and monorepos",
   "keywords": [
@@ -7,15 +7,15 @@
     "publish",
     "npm",
     "npmjs",
-    "dropx"
+    "dropdx"
   ],
-  "homepage": "https://github.com/dcdavidev/dropx#readme",
+  "homepage": "https://github.com/dcdavidev/dropdx#readme",
   "bugs": {
-    "url": "https://github.com/dcdavidev/dropx/issues"
+    "url": "https://github.com/dcdavidev/dropdx/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dcdavidev/dropx.git"
+    "url": "git+https://github.com/dcdavidev/dropdx.git"
   },
   "license": "MIT",
   "author": "Davide Di Criscito <dcdavidev@gmail.com>",
@@ -30,7 +30,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "dropx": "bin/dropx.js"
+    "dropdx": "bin/dropdx.js"
   },
   "files": [
     "bin",

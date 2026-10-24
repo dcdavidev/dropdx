@@ -1,11 +1,11 @@
-# dropx 🧙‍♂️🚀
+# dropdx 🧙‍♂️🚀
 
-[![npm version](https://img.shields.io/npm/v/dropx?color=a855f7&style=flat-square)](https://www.npmjs.com/package/dropx)
+[![npm version](https://img.shields.io/npm/v/dropdx?color=a855f7&style=flat-square)](https://www.npmjs.com/package/dropdx)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square)](LICENSE)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-9333ea.svg?style=flat-square)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-c084fc.svg?style=flat-square)](https://www.typescriptlang.org/)
 
-> **dropx** is an automated release, version bumping, and publishing CLI for single packages and monorepos. Designed with a vibrant purple terminal UI inspired by the [Spellbookx](https://github.com/dcdavidev/spellbookx) ecosystem.
+> **dropdx** is an automated release, version bumping, and publishing CLI for single packages and monorepos. Designed with a vibrant purple terminal UI inspired by the [Spellbookx](https://github.com/dcdavidev/spellbookx) ecosystem.
 
 ---
 
@@ -37,7 +37,7 @@ Publishing npm packages manually or in complex monorepos often involves repetiti
 - Forgetting to bump internal dependency versions between workspace packages.
 - Overlooking git commit, annotated tagging, or remote branch synchronization.
 
-**dropx** streamlines this entire process into a single command with zero initial configuration required. It inspects your repository, queries your registry, determines whether version bumps are necessary, updates changelogs, builds packages, creates annotated Git tags, pushes to remote origin, and publishes packages reliably.
+**dropdx** streamlines this entire process into a single command with zero initial configuration required. It inspects your repository, queries your registry, determines whether version bumps are necessary, updates changelogs, builds packages, creates annotated Git tags, pushes to remote origin, and publishes packages reliably.
 
 ---
 
@@ -53,38 +53,38 @@ Publishing npm packages manually or in complex monorepos often involves repetiti
 - 🛡️ **CI/CD Ready**: Supports `--provenance` attestation, `--otp` two-factor authentication, and non-interactive CI workflows.
 - 🎨 **Purple & Lavender Visuals**: Truecolor ANSI styling with expressive emojis inspired by the Spellbookx suite.
 - 🤖 **AI Agent Skills**: Built-in `.agents/skills` enabling AI coding assistants to automatically configure, dry-run, and execute release pipelines.
-- 💻 **Full TypeScript Support & Programmatic API**: Use as a CLI binary (`dropx`) or import helper functions and types into your own Node.js/TypeScript scripts.
+- 💻 **Full TypeScript Support & Programmatic API**: Use as a CLI binary (`dropdx`) or import helper functions and types into your own Node.js/TypeScript scripts.
 
 ---
 
 ## Installation
 
-You can run `dropx` on-demand using your preferred package runner, or install it locally as a development dependency.
+You can run `dropdx` on-demand using your preferred package runner, or install it locally as a development dependency.
 
 ### Using Package Runners (No Installation Needed)
 
 ```bash
 # Using pnpm
-pnpm dlx dropx
+pnpm dlx dropdx
 
 # Using npm
-npx dropx
+npx dropdx
 
 # Using yarn
-yarn dlx dropx
+yarn dlx dropdx
 ```
 
 ### Local Project Installation
 
 ```bash
 # Using pnpm
-pnpm add -D dropx
+pnpm add -D dropdx
 
 # Using npm
-npm install --save-dev dropx
+npm install --save-dev dropdx
 
 # Using yarn
-yarn add -D dropx
+yarn add -D dropdx
 ```
 
 ---
@@ -96,10 +96,10 @@ yarn add -D dropx
 ```json
 {
   "scripts": {
-    "release": "dropx",
-    "release:dry": "dropx --dry-run",
-    "release:minor": "dropx --minor",
-    "release:major": "dropx --major"
+    "release": "dropdx",
+    "release:dry": "dropdx --dry-run",
+    "release:minor": "dropdx --minor",
+    "release:major": "dropdx --major"
   }
 }
 ```
@@ -125,12 +125,12 @@ pnpm run release
 ## CLI Command-Line Reference
 
 ```text
-🧙 DROPX - Automated Release & Publish CLI 🚀
+🧙 DROPDX - Automated Release & Publish CLI 🚀
 
 Usage:
-  dropx [options]
-  npx dropx [options]
-  pnpm exec dropx [options]
+  dropdx [options]
+  npx dropdx [options]
+  pnpm exec dropdx [options]
 ```
 
 ### Options Table
@@ -156,13 +156,13 @@ Usage:
 | `--skip-publish`   |           | Skip publishing packages to the registry                        | `false`                    |
 | `--allow-dirty`    |           | Allow release even with uncommitted changes in git repository   | `false`                    |
 | `--help`           | `-h`      | Display help screen                                             |                            |
-| `--version`        | `-v`      | Display `dropx` version                                         |                            |
+| `--version`        | `-v`      | Display `dropdx` version                                        |                            |
 
 ---
 
 ## The 7-Step Release Pipeline
 
-When executed, `dropx` follows a structured 7-phase release pipeline:
+When executed, `dropdx` follows a structured 7-phase release pipeline:
 
 ```text
 [1/7] 🔍 Pre-Flight Environment Validations
@@ -202,7 +202,7 @@ When executed, `dropx` follows a structured 7-phase release pipeline:
 
 ## Registry Resolution (`.npmrc`)
 
-`dropx` prioritizes your configured registry using the following resolution chain:
+`dropdx` prioritizes your configured registry using the following resolution chain:
 
 1. **CLI Flag**: Value passed directly via `--registry <url>`.
 2. **Project Scoped Registry**: Matching `@scope:registry` entry in `<projectRoot>/.npmrc`.
@@ -234,7 +234,7 @@ registry=https://registry.npmjs.org/
 
 ## Engine Auto-Detection
 
-`dropx` adapts dynamically to existing tooling in your repository:
+`dropdx` adapts dynamically to existing tooling in your repository:
 
 | Engine           | When Selected                                                                         | Behavior                                                                                                                                   |
 | :--------------- | :------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -245,15 +245,15 @@ registry=https://registry.npmjs.org/
 You can explicitly force an engine at any time with `--engine <name>`:
 
 ```bash
-dropx --engine changeset
-dropx --engine internal
+dropdx --engine changeset
+dropdx --engine internal
 ```
 
 ---
 
 ## Monorepo Support
 
-`dropx` automatically identifies workspaces in:
+`dropdx` automatically identifies workspaces in:
 
 - **pnpm workspaces**: Reads `pnpm-workspace.yaml`.
 - **npm / yarn workspaces**: Reads the `workspaces` array in root `package.json`.
@@ -261,7 +261,7 @@ dropx --engine internal
 
 ### Topological Dependency Sorting
 
-If package `B` depends on package `A` within the monorepo, `dropx` ensures that package `A` is versioned, built, and published **before** package `B`. Internal dependency version ranges in `package.json` are also automatically updated to match the newly bumped version.
+If package `B` depends on package `A` within the monorepo, `dropdx` ensures that package `A` is versioned, built, and published **before** package `B`. Internal dependency version ranges in `package.json` are also automatically updated to match the newly bumped version.
 
 ### Filtering Non-Publishable Packages
 
@@ -321,8 +321,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Run dropx release
-        run: pnpm exec dropx --bump ${{ inputs.bump }} --provenance
+      - name: Run dropdx release
+        run: pnpm exec dropdx --bump ${{ inputs.bump }} --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -332,7 +332,7 @@ jobs:
 
 ## Programmatic TypeScript API
 
-`dropx` exports all core utilities and types, allowing you to build custom release automation scripts:
+`dropdx` exports all core utilities and types, allowing you to build custom release automation scripts:
 
 ```typescript
 import {
@@ -345,7 +345,7 @@ import {
   findPackages,
   resolveRegistry,
   resolveTargetVersion,
-} from 'dropx';
+} from 'dropdx';
 
 // Run the full CLI programmatically
 await cli(['--dry-run', '--bump', 'minor']);
@@ -363,7 +363,7 @@ console.log(`Target version to publish: ${target}`);
 
 ### Exported Types
 
-All TypeScript definitions are exported directly from `dropx`:
+All TypeScript definitions are exported directly from `dropdx`:
 
 - `CliOptions`
 - `WorkspacePackage`
@@ -378,24 +378,24 @@ All TypeScript definitions are exported directly from `dropx`:
 
 ## AI Agent Skills
 
-`dropx` includes official agent skills conforming to the open [Agent Skills specification](https://github.com/vercel-labs/skills). These skills enable AI coding assistants (such as Antigravity, Cursor, GitHub Copilot, Claude Code, Cline, Windsurf, Zed, and Warp) to automatically configure release scripts, run dry-run simulations, troubleshoot registry permissions, and execute releases without manual prompt engineering.
+`dropdx` includes official agent skills conforming to the open [Agent Skills specification](https://github.com/vercel-labs/skills). These skills enable AI coding assistants (such as Antigravity, Cursor, GitHub Copilot, Claude Code, Cline, Windsurf, Zed, and Warp) to automatically configure release scripts, run dry-run simulations, troubleshoot registry permissions, and execute releases without manual prompt engineering.
 
 ### Available Skills
 
-| Skill       | Description                                                                                                                                                                                                                | Location                                                  |
-| :---------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
-| **`dropx`** | Guides automated package releasing, SemVer version bumping, Conventional Commits changelog generation, `.npmrc` registry resolution, and npm publishing for single packages and monorepos via CLI and programmatic TS API. | [`.agents/skills/dropx`](./.agents/skills/dropx/SKILL.md) |
+| Skill        | Description                                                                                                                                                                                                                | Location                                                    |
+| :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------- |
+| **`dropdx`** | Guides automated package releasing, SemVer version bumping, Conventional Commits changelog generation, `.npmrc` registry resolution, and npm publishing for single packages and monorepos via CLI and programmatic TS API. | [`.agents/skills/dropdx`](./.agents/skills/dropdx/SKILL.md) |
 
 ### Installation
 
-Install the `dropx` skill into your project using the `skills` CLI:
+Install the `dropdx` skill into your project using the `skills` CLI:
 
 ```bash
-# Add the dropx skill to your project
-npx skills add dcdavidev/dropx --skill dropx
+# Add the dropdx skill to your project
+npx skills add dcdavidev/dropdx --skill dropdx
 
 # Or install globally for your personal AI assistant across all workspaces:
-npx skills add -g dcdavidev/dropx --skill dropx
+npx skills add -g dcdavidev/dropdx --skill dropdx
 ```
 
 #### Manual Installation
@@ -404,19 +404,19 @@ You can also copy the skill directly into any project's `.agents/skills` directo
 
 ```bash
 mkdir -p .agents/skills
-git clone --depth 1 https://github.com/dcdavidev/dropx.git /tmp/dropx
-cp -r /tmp/dropx/.agents/skills/dropx .agents/skills/
-rm -rf /tmp/dropx
+git clone --depth 1 https://github.com/dcdavidev/dropdx.git /tmp/dropdx
+cp -r /tmp/dropdx/.agents/skills/dropdx .agents/skills/
+rm -rf /tmp/dropdx
 ```
 
 ### Usage with AI Assistants
 
 Once installed, your AI coding assistant automatically discovers and activates the skill when relevant. You can also trigger it directly with natural language instructions:
 
-- _"Run a dry-run release check on this repository using the `dropx` skill."_
-- _"Set up `dropx` release scripts in `package.json` and a GitHub Actions workflow with npm provenance."_
-- _"Release a new minor version of our workspace packages using `dropx`."_
-- _"Configure `.npmrc` scoped registry resolution and verify publishing with `dropx --dry-run`."_
+- _"Run a dry-run release check on this repository using the `dropdx` skill."_
+- _"Set up `dropdx` release scripts in `package.json` and a GitHub Actions workflow with npm provenance."_
+- _"Release a new minor version of our workspace packages using `dropdx`."_
+- _"Configure `.npmrc` scoped registry resolution and verify publishing with `dropdx --dry-run`."_
 
 For full documentation and skill details, see [`.agents/README.md`](./.agents/README.md).
 
@@ -426,8 +426,8 @@ For full documentation and skill details, see [`.agents/README.md`](./.agents/RE
 
 ```bash
 # Clone the repository
-git clone https://github.com/dcdavidev/dropx.git
-cd dropx
+git clone https://github.com/dcdavidev/dropdx.git
+cd dropdx
 
 # Install dependencies
 pnpm install

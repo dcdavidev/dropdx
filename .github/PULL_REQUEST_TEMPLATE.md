@@ -26,7 +26,7 @@ Fixes #
 <!-- Describe the tests you ran to verify your changes. Include details of your test environment. -->
 
 - [ ] Unit tests (`pnpm test`)
-- [ ] Simulated release CLI dry-run (`./bin/dropx.js --dry-run`)
+- [ ] Simulated release CLI dry-run (`./bin/dropdx.js --dry-run`)
 - [ ] Full quality validation suite (`pnpm run check:ci`)
 
 ## Checklist

@@ -27,7 +27,7 @@ export function checkGitEnvironment(
     exec('git rev-parse --is-inside-work-tree', { cwd: rootDir });
   } catch (error) {
     throw new Error(
-      'Not inside a Git repository. dropx must be executed at the repository root.',
+      'Not inside a Git repository. dropdx must be executed at the repository root.',
       { cause: error }
     );
   }

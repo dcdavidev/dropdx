@@ -1,11 +1,11 @@
 ---
-name: dropx
-description: Guides automated package releasing, SemVer version bumping, Conventional Commits changelog generation, .npmrc registry resolution, and npm publishing for single packages and monorepos using the dropx CLI and programmatic TypeScript API.
+name: dropdx
+description: Guides automated package releasing, SemVer version bumping, Conventional Commits changelog generation, .npmrc registry resolution, and npm publishing for single packages and monorepos using the dropdx CLI and programmatic TypeScript API.
 ---
 
-# dropx Skill
+# dropdx Skill
 
-This skill guides an AI agent through configuring, testing (dry-running), troubleshooting, and executing automated package releases and publications for standalone packages and monorepos using **`dropx`**.
+This skill guides an AI agent through configuring, testing (dry-running), troubleshooting, and executing automated package releases and publications for standalone packages and monorepos using **`dropdx`**.
 
 ---
 
@@ -17,46 +17,46 @@ Activate this skill when:
 - Running safe pre-release simulations (`--dry-run`) to verify version bumps, build scripts, git tags, and registry permissions.
 - Automating SemVer version calculations (`patch`, `minor`, `major`, `prerelease`) based on Conventional Commits and live npm registry versions.
 - Configuring `package.json` release scripts or GitHub Actions CI/CD release workflows with npm provenance.
-- Orchestrating releases across repositories that use `@changesets/cli`, `release-it`, or `dropx`'s zero-dependency built-in release engine.
-- Building custom release scripts using `dropx`'s programmatic TypeScript API.
+- Orchestrating releases across repositories that use `@changesets/cli`, `release-it`, or `dropdx`'s zero-dependency built-in release engine.
+- Building custom release scripts using `dropdx`'s programmatic TypeScript API.
 
 ---
 
 ## 2. CLI Usage & Runbooks
 
-`dropx` can be invoked directly via a package runner (`pnpm dlx`, `npx`, `yarn dlx`) or installed locally as a development dependency.
+`dropdx` can be invoked directly via a package runner (`pnpm dlx`, `npx`, `yarn dlx`) or installed locally as a development dependency.
 
 ### Installation
 
 ```bash
 # Install locally in a project (recommended)
-pnpm add -D dropx
+pnpm add -D dropdx
 # or
-npm install --save-dev dropx
+npm install --save-dev dropdx
 
 # Ad-hoc execution without installing
-pnpm dlx dropx [options]
-npx dropx [options]
+pnpm dlx dropdx [options]
+npx dropdx [options]
 ```
 
 ### Common Command Runbooks
 
-| Goal                                                     | Command                                              |
-| :------------------------------------------------------- | :--------------------------------------------------- |
-| **Simulate full release pipeline (safe dry-run)**        | `pnpm exec dropx --dry-run`                          |
-| **Auto-detect bump from Conventional Commits & release** | `pnpm exec dropx`                                    |
-| **Explicit patch release (`x.y.Z`)**                     | `pnpm exec dropx --patch`                            |
-| **Explicit minor release (`x.Y.0`)**                     | `pnpm exec dropx --minor`                            |
-| **Explicit major release (`X.0.0`)**                     | `pnpm exec dropx --major`                            |
-| **Explicit prerelease (`x.y.z-rc.0`)**                   | `pnpm exec dropx --prerelease`                       |
-| **Force bump even if local version > registry version**  | `pnpm exec dropx --force-bump`                       |
-| **Release with custom commit & changelog summary**       | `pnpm exec dropx -m "feat: add new API endpoints"`   |
-| **Publish to a specific dist-tag (e.g. `beta`, `next`)** | `pnpm exec dropx --prerelease --tag next`            |
-| **Publish to a custom registry URL**                     | `pnpm exec dropx --registry https://npm.my-org.com/` |
-| **Publish with 2FA One-Time Password (OTP)**             | `pnpm exec dropx --otp 123456`                       |
-| **Publish in CI with npm provenance attestation**        | `pnpm exec dropx --provenance`                       |
-| **Force built-in engine (bypass Changesets/Release-It)** | `pnpm exec dropx --engine internal`                  |
-| **Bump & build locally without git or npm publish**      | `pnpm exec dropx --skip-git --skip-publish`          |
+| Goal                                                     | Command                                               |
+| :------------------------------------------------------- | :---------------------------------------------------- |
+| **Simulate full release pipeline (safe dry-run)**        | `pnpm exec dropdx --dry-run`                          |
+| **Auto-detect bump from Conventional Commits & release** | `pnpm exec dropdx`                                    |
+| **Explicit patch release (`x.y.Z`)**                     | `pnpm exec dropdx --patch`                            |
+| **Explicit minor release (`x.Y.0`)**                     | `pnpm exec dropdx --minor`                            |
+| **Explicit major release (`X.0.0`)**                     | `pnpm exec dropdx --major`                            |
+| **Explicit prerelease (`x.y.z-rc.0`)**                   | `pnpm exec dropdx --prerelease`                       |
+| **Force bump even if local version > registry version**  | `pnpm exec dropdx --force-bump`                       |
+| **Release with custom commit & changelog summary**       | `pnpm exec dropdx -m "feat: add new API endpoints"`   |
+| **Publish to a specific dist-tag (e.g. `beta`, `next`)** | `pnpm exec dropdx --prerelease --tag next`            |
+| **Publish to a custom registry URL**                     | `pnpm exec dropdx --registry https://npm.my-org.com/` |
+| **Publish with 2FA One-Time Password (OTP)**             | `pnpm exec dropdx --otp 123456`                       |
+| **Publish in CI with npm provenance attestation**        | `pnpm exec dropdx --provenance`                       |
+| **Force built-in engine (bypass Changesets/Release-It)** | `pnpm exec dropdx --engine internal`                  |
+| **Bump & build locally without git or npm publish**      | `pnpm exec dropdx --skip-git --skip-publish`          |
 
 ### CLI Options Reference
 
@@ -80,14 +80,14 @@ npx dropx [options]
 | `--skip-git`       |           | Skip git commit, annotated tag, and remote push steps                     | `false`                      |
 | `--skip-publish`   |           | Skip publishing packages to the npm registry                              | `false`                      |
 | `--allow-dirty`    |           | Allow running with uncommitted changes in the git working tree            | `false`                      |
-| `--version`        | `-v`      | Print the installed `dropx` version                                       |                              |
+| `--version`        | `-v`      | Print the installed `dropdx` version                                      |                              |
 | `--help`           | `-h`      | Display CLI help and usage reference                                      |                              |
 
 ---
 
 ## 3. The 7-Step Release Pipeline
 
-When invoked, `dropx` executes a deterministic 7-step release pipeline:
+When invoked, `dropdx` executes a deterministic 7-step release pipeline:
 
 1. **`[1/7]` Pre-Flight Environment Validations**:
    - Verifies Node.js version is `>= 20.0.0`.
@@ -124,11 +124,11 @@ When invoked, `dropx` executes a deterministic 7-step release pipeline:
 | :--------------- | :------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`changeset`**  | `.changeset/config.json` exists or `@changesets/cli` is listed in `dependencies`/`devDependencies`                  | Uses pending `.changeset/*.md` files (or generates an automated changeset if none exist), runs `changeset version`, then continues the pipeline. |
 | **`release-it`** | `.release-it.*` config file exists, `release-it` is in dependencies, or `"release-it"` key exists in `package.json` | Delegates the release workflow directly to `release-it <bump> --ci` with mapped flags (`--dry-run`, `--npm.tag`, `--npm.otp`).                   |
-| **`internal`**   | Default when neither Changesets nor Release-It is detected, or when `--engine internal` is passed                   | Uses `dropx`'s built-in SemVer bumper, Conventional Commits changelog generator, topological builder, git tagger, and package publisher.         |
+| **`internal`**   | Default when neither Changesets nor Release-It is detected, or when `--engine internal` is passed                   | Uses `dropdx`'s built-in SemVer bumper, Conventional Commits changelog generator, topological builder, git tagger, and package publisher.        |
 
 ### Workspace Discovery & Topological Sorting
 
-`dropx` natively discovers packages across:
+`dropdx` natively discovers packages across:
 
 1. **pnpm workspaces**: Parses `packages` globs from `pnpm-workspace.yaml`.
 2. **npm / Yarn workspaces**: Parses `workspaces` array or `workspaces.packages` from root `package.json`.
@@ -153,7 +153,7 @@ For every package, `resolveRegistry(pkgName, options, rootDir)` resolves the tar
 
 ## 5. Programmatic TypeScript API
 
-`dropx` exports its CLI runner, utilities, and TypeScript interfaces for custom release scripts.
+`dropdx` exports its CLI runner, utilities, and TypeScript interfaces for custom release scripts.
 
 ```typescript
 import {
@@ -177,7 +177,7 @@ import {
   resolveTargetVersion,
   sortPackagesTopologically,
   updateChangelog,
-} from 'dropx';
+} from 'dropdx';
 
 // 1. Run the CLI pipeline programmatically
 await cli(['--dry-run', '--minor']);
@@ -215,11 +215,11 @@ Add standard release scripts to the root `package.json`:
 ```json
 {
   "scripts": {
-    "release": "dropx",
-    "release:dry": "dropx --dry-run",
-    "release:patch": "dropx --patch",
-    "release:minor": "dropx --minor",
-    "release:major": "dropx --major"
+    "release": "dropdx",
+    "release:dry": "dropdx --dry-run",
+    "release:patch": "dropdx --patch",
+    "release:minor": "dropdx --minor",
+    "release:major": "dropdx --major"
   }
 }
 ```
@@ -276,12 +276,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Run dropx release
+      - name: Run dropdx release
         run: |
           if [ "${{ inputs.bump }}" = "auto" ]; then
-            pnpm exec dropx --provenance
+            pnpm exec dropdx --provenance
           else
-            pnpm exec dropx --bump ${{ inputs.bump }} --provenance
+            pnpm exec dropdx --bump ${{ inputs.bump }} --provenance
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -292,12 +292,12 @@ jobs:
 
 ## 7. Verification & Troubleshooting
 
-1. **Always Dry-Run First**: Before executing a live release, run `pnpm exec dropx --dry-run` to validate Node/Git status, registry authentication, package discovery, and target version calculations without mutating files.
+1. **Always Dry-Run First**: Before executing a live release, run `pnpm exec dropdx --dry-run` to validate Node/Git status, registry authentication, package discovery, and target version calculations without mutating files.
 2. **Authentication Errors (`ENEEDAUTH` / `npm whoami` failed)**:
    - Ensure `NPM_TOKEN` or `NODE_AUTH_TOKEN` is exported in your environment, or authenticate interactively via `npm login --registry <url>`.
 3. **Uncommitted Changes Error**:
-   - Commit or stash working tree modifications before running `dropx`, or pass `--allow-dirty` only when intentional.
+   - Commit or stash working tree modifications before running `dropdx`, or pass `--allow-dirty` only when intentional.
 4. **No Publishable Packages Found**:
    - Verify that target packages do not have `"private": true` in `package.json`, or explicitly configure `"publishConfig": { "access": "public" }`.
 5. **Existing Git Tag Conflict (`Git tag "vX.Y.Z" already exists`)**:
-   - If a tag already exists for the current local version, `dropx` automatically forces a version bump when calculating target versions. If a tag from a partial previous release blocks tagging, pass `--force-bump` or an explicit bump flag (`--patch`, `--minor`, `--major`).
+   - If a tag already exists for the current local version, `dropdx` automatically forces a version bump when calculating target versions. If a tag from a partial previous release blocks tagging, pass `--force-bump` or an explicit bump flag (`--patch`, `--minor`, `--major`).

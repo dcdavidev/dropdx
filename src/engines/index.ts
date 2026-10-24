@@ -9,7 +9,7 @@ import path from 'node:path';
 import type { CliOptions, EngineType, WorkspacePackage } from '../types.js';
 
 /**
- * Detects whether Changesets, Release-It, or the built-in dropx engine should be used.
+ * Detects whether Changesets, Release-It, or the built-in dropdx engine should be used.
  *
  * @param rootDir - Path to repository workspace root.
  * @param packages - Discovered packages list.

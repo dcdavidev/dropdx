@@ -1,6 +1,6 @@
 /**
- * @file src/engines/dropx-engine.ts
- * Default autonomous dropx release engine for versioning, changelog, and publishing.
+ * @file src/engines/dropdx-engine.ts
+ * Default autonomous dropdx release engine for versioning, changelog, and publishing.
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
