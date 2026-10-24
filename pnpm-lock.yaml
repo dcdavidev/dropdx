@@ -218,8 +218,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@spellbookx/recipes':
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.1.0
+        version: 1.1.0
       '@types/node':
         specifier: ^26.6.5
         version: 26.6.5
@@ -227,8 +227,8 @@ importers:
         specifier: ^4.3.2
         version: 4.3.2(@types/node@26.6.5)(typescript@5.9.3)
       commitlint-config-spellbookx:
-        specifier: ^1.0.1
-        version: 1.0.1(@types/node@26.6.5)(conventional-commits-parser@7.1.3)(typescript@5.9.3)
+        specifier: ^1.0.2
+        version: 1.0.2(@types/node@26.6.5)(conventional-commits-parser@7.1.3)(typescript@5.9.3)
       conventional-changelog-conventionalcommits:
         specifier: ^10.4.1
         version: 10.4.1
@@ -236,8 +236,8 @@ importers:
         specifier: ^10.4.0
         version: 10.4.0
       cspell-config-spellbookx:
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.0.2
+        version: 1.0.2
       cz-git:
         specifier: ^1.14.0
         version: 1.14.0
@@ -245,8 +245,8 @@ importers:
         specifier: ^10.13.0
         version: 10.13.0(jiti@2.7.0)(supports-color@7.2.0)
       eslint-plugin-spellbookx:
-        specifier: ^1.0.1
-        version: 1.0.1(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))(prettier@3.9.10)(supports-color@7.2.0)(svelte@5.57.2(@typescript-eslint/types@8.72.0))(typescript@5.9.3)
+        specifier: ^1.1.0
+        version: 1.1.0(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))(prettier@3.9.10)(supports-color@7.2.0)(svelte@5.57.2(@typescript-eslint/types@8.72.0))(typescript@5.9.3)
       lefthook:
         specifier: ^2.2.2
         version: 2.2.2
@@ -254,8 +254,8 @@ importers:
         specifier: ^3.9.10
         version: 3.9.10
       prettier-config-spellbookx:
-        specifier: ^1.0.1
-        version: 1.0.1(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(supports-color@7.2.0)(svelte@5.57.2(@typescript-eslint/types@8.72.0))
+        specifier: ^1.0.2
+        version: 1.0.2(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(supports-color@7.2.0)(svelte@5.57.2(@typescript-eslint/types@8.72.0))
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -1102,8 +1102,11 @@ packages:
     resolution: {integrity: sha512-TeheYy0ILzBEI/CO55CP6zJCSdSWeRtGnHy8U8dWSUH4I68iqTsy7HkMktR4xakThc9jotkPQUXT4ITdbV7cHA==}
     engines: {node: '>=18'}
 
-  '@spellbookx/recipes@1.0.1':
-    resolution: {integrity: sha512-y35SRIjOzfsfYU2uac6YgTAaBsBGG/LPAyIFi+5YOwEumqqQhzY77AMxY0+CVqpLhRD3UhBzQV13uTBnWqhfqA==}
+  '@spellbookx/recipes@1.0.2':
+    resolution: {integrity: sha512-6yYYL4+jWTCGmxcBG7aQuRZRCQYTyC64LhE6JrVXtM1fHyEpmtUvGahsWTqEMKaPCUhrwG+5cGMRICIgZg6Dzw==}
+
+  '@spellbookx/recipes@1.1.0':
+    resolution: {integrity: sha512-JoHHFZJo/NkQ+5FGk7FcfBrMnC0nUXjrRvxzbxW80OwEutxSm0bGzxkz/oD80CnxEatJgNAnk+iJ1FXxtoOezw==}
 
   '@sveltejs/acorn-typescript@1.0.13':
     resolution: {integrity: sha512-wgKggnhZVL9Bfx1OaKKTrYY9BFRk6C8UAkQNUcIv1+llzYrIqy+RZm5HPKzn0NpEBvTVhTqB4kQyllZywsRBRQ==}
@@ -1658,8 +1661,8 @@ packages:
     engines: {node: '>= 18'}
     hasBin: true
 
-  commitlint-config-spellbookx@1.0.1:
-    resolution: {integrity: sha512-Wdf+YeyjVOj3ExM2VRtogGepyadzteTN0DhM3TKXUPGu5lcg8sIUdVXUnurEK7Eh2cAalKoDtHNXOdzmyybvnQ==}
+  commitlint-config-spellbookx@1.0.2:
+    resolution: {integrity: sha512-XO7cm48vuJp5+eYDPRhxZkrpy8n3B5d6mMXrmOdjp8oBwLhs8O7DJftSJ92ewU8daSmU1pfBz+p7LBnu4oTmaw==}
 
   compare-versions@6.1.1:
     resolution: {integrity: sha512-4hm4VPpIecmlg59CHXnRDnqGplJFrbLG4aFEl5vl6cK1u76ws3LLvX7ikFnTDl5vo39sjWD6AaDPYodJp/NNHg==}
@@ -1707,8 +1710,8 @@ packages:
     resolution: {integrity: sha512-1P0xmWIlGqwsHf8he9BWNdqV2bvRBkxCv5ctj3oHBraRFS6CPjdJBptyjuM0dgTwxmxPFcuWhTG8miTvFMje5g==}
     engines: {node: '>=22.18.0'}
 
-  cspell-config-spellbookx@1.0.1:
-    resolution: {integrity: sha512-UIYB++FkS3USdxUHDvKTYfndjOp1hFHPkbQqtCsORxoGtcg+VQSL70kh95uO7Jq9Y9kf7x6LA3j01VFZry98vg==}
+  cspell-config-spellbookx@1.0.2:
+    resolution: {integrity: sha512-so+ydvxz0oUq8rhcpQEOxh7QzF2Kw/L+k54J3W3YtiaeZqH3bfBddOHVSfxNDYs3YGe3v7lfuTGqv2UgGtkOeg==}
 
   cspell-dictionary@10.4.0:
     resolution: {integrity: sha512-FwCQBzqOxjAg+GhymrY288As9DmJqHVrkAr++0tCQ1wWFVw2Nt1W3cCKn9W987Dr+giSuNREdQFpGbQ/cHluTg==}
@@ -2122,8 +2125,8 @@ packages:
     peerDependencies:
       eslint: '>=5.0.0'
 
-  eslint-plugin-spellbookx@1.0.1:
-    resolution: {integrity: sha512-XJDdfchC4eROBVO0cLudCZT5eY3CX3ecTMk8zKd2t0BWrhVtf2gx1B/y0tBxHkCYaYfFOH00sTpeF15SwTqO7g==}
+  eslint-plugin-spellbookx@1.1.0:
+    resolution: {integrity: sha512-4kHSxgP9NAtcK0sALHubc1dJg7Nl7Agjoz9VF+JezPH/PB9ysfp49uXRAUXM66sNODhiKh1heBWnxNwwsOqOcw==}
     peerDependencies:
       eslint: ^9.39.2 || ^10.0.0
 
@@ -3212,8 +3215,8 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
-  prettier-config-spellbookx@1.0.1:
-    resolution: {integrity: sha512-7JYO82VE/OWBp4YYvfF9nLK9i8+caIPJWMXQWIegPW7YuyaPREHNMz+xpp8bwVoDHbWG2EfqOIDhOFceX3r//A==}
+  prettier-config-spellbookx@1.0.2:
+    resolution: {integrity: sha512-YNnFj8+qMbXC7jKlfQxSpZ6pjdgmIvQA0KgYXhpBAM/GlpKOB2z0+SB6uYx4wQYxjxWYisof3AY2nrAwPD/Ldw==}
 
   prettier-linter-helpers@1.0.1:
     resolution: {integrity: sha512-SxToR7P8Y2lWmv/kTzVLC1t/GDI2WGjMwNhLLE9qtH8Q13C+aEmuRlzDst4Up4s0Wc8sF2M+J57iB3cMLqftfg==}
@@ -4813,7 +4816,9 @@ snapshots:
 
   '@sindresorhus/base62@1.0.0': {}
 
-  '@spellbookx/recipes@1.0.1': {}
+  '@spellbookx/recipes@1.0.2': {}
+
+  '@spellbookx/recipes@1.1.0': {}
 
   '@sveltejs/acorn-typescript@1.0.13(acorn@8.19.0)':
     dependencies:
@@ -5325,7 +5330,7 @@ snapshots:
       - '@types/node'
       - typescript
 
-  commitlint-config-spellbookx@1.0.1(@types/node@26.6.5)(conventional-commits-parser@7.1.3)(typescript@5.9.3):
+  commitlint-config-spellbookx@1.0.2(@types/node@26.6.5)(conventional-commits-parser@7.1.3)(typescript@5.9.3):
     dependencies:
       '@commitlint/cli': 21.2.4(conventional-commits-parser@7.1.3)(typescript@5.9.3)
       '@commitlint/config-conventional': 21.2.4
@@ -5390,10 +5395,10 @@ snapshots:
       smol-toml: 1.9.1
       yaml: 2.9.1
 
-  cspell-config-spellbookx@1.0.1:
+  cspell-config-spellbookx@1.0.2:
     dependencies:
       '@cspell/cspell-types': 10.4.0
-      '@spellbookx/recipes': 1.0.1
+      '@spellbookx/recipes': 1.0.2
       cspell: 10.4.0
 
   cspell-dictionary@10.4.0:
@@ -5987,14 +5992,14 @@ snapshots:
     dependencies:
       eslint: 10.13.0(jiti@2.7.0)(supports-color@7.2.0)
 
-  eslint-plugin-spellbookx@1.0.1(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))(prettier@3.9.10)(supports-color@7.2.0)(svelte@5.57.2(@typescript-eslint/types@8.72.0))(typescript@5.9.3):
+  eslint-plugin-spellbookx@1.1.0(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))(prettier@3.9.10)(supports-color@7.2.0)(svelte@5.57.2(@typescript-eslint/types@8.72.0))(typescript@5.9.3):
     dependencies:
       '@cspell/eslint-plugin': 10.4.0(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))
       '@eslint-react/eslint-plugin': 2.13.0(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
       '@eslint/js': 10.0.1(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))
       '@eslint/json': 1.2.0
       '@eslint/markdown': 7.5.1(supports-color@7.2.0)
-      '@spellbookx/recipes': 1.0.1
+      '@spellbookx/recipes': 1.1.0
       '@typescript-eslint/parser': 8.72.0(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@5.9.3)
       eslint: 10.13.0(jiti@2.7.0)(supports-color@7.2.0)
       eslint-config-prettier: 10.1.8(eslint@10.13.0(jiti@2.7.0)(supports-color@7.2.0))
@@ -7319,11 +7324,11 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-config-spellbookx@1.0.1(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(supports-color@7.2.0)(svelte@5.57.2(@typescript-eslint/types@8.72.0)):
+  prettier-config-spellbookx@1.0.2(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(supports-color@7.2.0)(svelte@5.57.2(@typescript-eslint/types@8.72.0)):
     dependencies:
       '@ianvs/prettier-plugin-sort-imports': 4.7.1(prettier@3.9.10)(supports-color@7.2.0)
       '@prettier/plugin-xml': 3.4.2(prettier@3.9.10)
-      '@spellbookx/recipes': 1.0.1
+      '@spellbookx/recipes': 1.0.2
       prettier: 3.9.10
       prettier-plugin-astro: 1.1.1(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(prettier@3.9.10)
       prettier-plugin-embed: 0.8.1

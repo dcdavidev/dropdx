@@ -1,10 +1,10 @@
 allowBuilds:
   lefthook: true
 minimumReleaseAgeExclude:
-  - '@spellbookx/recipes@1.0.1'
-  - eslint-plugin-spellbookx@1.0.1
-  - eslint-plugin-vuoto@1.0.0
-  - vuoto@1.0.0
-  - commitlint-config-spellbookx@1.0.1
-  - cspell-config-spellbookx@1.0.1
-  - prettier-config-spellbookx@1.0.1
+  - '@spellbookx/recipes'
+  - eslint-plugin-spellbookx
+  - eslint-plugin-vuoto
+  - vuoto
+  - commitlint-config-spellbookx
+  - cspell-config-spellbookx
+  - prettier-config-spellbookx
