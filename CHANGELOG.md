@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.1 - 2026-10-24
+
+### 🔧 Maintenance & Chores
+
+- **dropdx:** rename package and repository to dropdx (2e0bd6c)
+
 ## v0.1.0 - 2026-10-24
 
 ### ✨ Features
