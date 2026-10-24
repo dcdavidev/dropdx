@@ -1,12 +1,12 @@
 name: ✨ Feature Request
-description: Suggest an idea, enhancement, or new feature for relsx
+description: Suggest an idea, enhancement, or new feature for dropx
 title: 'feat: '
 labels: ['enhancement', 'triage']
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a feature for relsx! Please describe your proposal clearly below.
+        Thank you for suggesting a feature for dropx! Please describe your proposal clearly below.
   - type: textarea
     id: problem
     attributes:

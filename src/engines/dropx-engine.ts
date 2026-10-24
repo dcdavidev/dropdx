@@ -1,6 +1,6 @@
 /**
- * @file src/engines/relsx-engine.ts
- * Default autonomous relsx release engine for versioning, changelog, and publishing.
+ * @file src/engines/dropx-engine.ts
+ * Default autonomous dropx release engine for versioning, changelog, and publishing.
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';

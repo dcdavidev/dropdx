@@ -36,7 +36,7 @@ export function logBanner(): void {
     `\n${c.purple}${c.bold}╔════════════════════════════════════════════════════════════════════════╗${c.reset}`
   );
   console.log(
-    `${c.purple}${c.bold}║             🧙  RELSX AUTOMATED RELEASE & PUBLISH PIPELINE  🚀         ║${c.reset}`
+    `${c.purple}${c.bold}║             🧙  DROPX AUTOMATED RELEASE & PUBLISH PIPELINE  🚀         ║${c.reset}`
   );
   console.log(
     `${c.purple}${c.bold}╚════════════════════════════════════════════════════════════════════════╝${c.reset}\n`
@@ -104,12 +104,12 @@ export function logError(msg: string): void {
  */
 export function printHelp(): void {
   console.log(`
-${purple(bold('🧙 RELSX - Automated Release & Publish CLI 🚀'))}
+${purple(bold('🧙 DROPX - Automated Release & Publish CLI 🚀'))}
 
 ${purple(bold('Uso:'))}
-  ${cyan('npx relsx')} [opzioni]
-  ${cyan('pnpm exec relsx')} [opzioni]
-  ${cyan('relsx')} [opzioni]
+  ${cyan('npx dropx')} [opzioni]
+  ${cyan('pnpm exec dropx')} [opzioni]
+  ${cyan('dropx')} [opzioni]
 
 ${purple(bold('Opzioni Version Bump:'))}
   ${cyan('--bump <patch|minor|major>')}   Livello di incremento versione (default: patch)
@@ -135,7 +135,7 @@ ${purple(bold('Opzioni Engine & Workflow:'))}
 
 ${purple(bold('Informazioni Generali:'))}
   ${cyan('-h, --help')}                    Mostra questo messaggio di aiuto
-  ${cyan('-v, --version')}                 Mostra la versione di relsx
+  ${cyan('-v, --version')}                 Mostra la versione di dropx
 `);
 }
 

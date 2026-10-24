@@ -1,0 +1,303 @@
+---
+name: dropx
+description: Guides automated package releasing, SemVer version bumping, Conventional Commits changelog generation, .npmrc registry resolution, and npm publishing for single packages and monorepos using the dropx CLI and programmatic TypeScript API.
+---
+
+# dropx Skill
+
+This skill guides an AI agent through configuring, testing (dry-running), troubleshooting, and executing automated package releases and publications for standalone packages and monorepos using **`dropx`**.
+
+---
+
+## 1. When to Use This Skill
+
+Activate this skill when:
+
+- Releasing and publishing a single npm package or a multi-package monorepo (`pnpm`, `npm`, `yarn`, or `lerna`).
+- Running safe pre-release simulations (`--dry-run`) to verify version bumps, build scripts, git tags, and registry permissions.
+- Automating SemVer version calculations (`patch`, `minor`, `major`, `prerelease`) based on Conventional Commits and live npm registry versions.
+- Configuring `package.json` release scripts or GitHub Actions CI/CD release workflows with npm provenance.
+- Orchestrating releases across repositories that use `@changesets/cli`, `release-it`, or `dropx`'s zero-dependency built-in release engine.
+- Building custom release scripts using `dropx`'s programmatic TypeScript API.
+
+---
+
+## 2. CLI Usage & Runbooks
+
+`dropx` can be invoked directly via a package runner (`pnpm dlx`, `npx`, `yarn dlx`) or installed locally as a development dependency.
+
+### Installation
+
+```bash
+# Install locally in a project (recommended)
+pnpm add -D dropx
+# or
+npm install --save-dev dropx
+
+# Ad-hoc execution without installing
+pnpm dlx dropx [options]
+npx dropx [options]
+```
+
+### Common Command Runbooks
+
+| Goal                                                     | Command                                              |
+| :------------------------------------------------------- | :--------------------------------------------------- |
+| **Simulate full release pipeline (safe dry-run)**        | `pnpm exec dropx --dry-run`                          |
+| **Auto-detect bump from Conventional Commits & release** | `pnpm exec dropx`                                    |
+| **Explicit patch release (`x.y.Z`)**                     | `pnpm exec dropx --patch`                            |
+| **Explicit minor release (`x.Y.0`)**                     | `pnpm exec dropx --minor`                            |
+| **Explicit major release (`X.0.0`)**                     | `pnpm exec dropx --major`                            |
+| **Explicit prerelease (`x.y.z-rc.0`)**                   | `pnpm exec dropx --prerelease`                       |
+| **Force bump even if local version > registry version**  | `pnpm exec dropx --force-bump`                       |
+| **Release with custom commit & changelog summary**       | `pnpm exec dropx -m "feat: add new API endpoints"`   |
+| **Publish to a specific dist-tag (e.g. `beta`, `next`)** | `pnpm exec dropx --prerelease --tag next`            |
+| **Publish to a custom registry URL**                     | `pnpm exec dropx --registry https://npm.my-org.com/` |
+| **Publish with 2FA One-Time Password (OTP)**             | `pnpm exec dropx --otp 123456`                       |
+| **Publish in CI with npm provenance attestation**        | `pnpm exec dropx --provenance`                       |
+| **Force built-in engine (bypass Changesets/Release-It)** | `pnpm exec dropx --engine internal`                  |
+| **Bump & build locally without git or npm publish**      | `pnpm exec dropx --skip-git --skip-publish`          |
+
+### CLI Options Reference
+
+| Option             | Shorthand | Description                                                               | Default                      |
+| :----------------- | :-------- | :------------------------------------------------------------------------ | :--------------------------- |
+| `--bump <type>`    |           | SemVer increment level: `patch`, `minor`, `major`, or `prerelease`        | Auto-detected (or `patch`)   |
+| `--patch`          |           | Shortcut for `--bump patch`                                               |                              |
+| `--minor`          |           | Shortcut for `--bump minor`                                               |                              |
+| `--major`          |           | Shortcut for `--bump major`                                               |                              |
+| `--prerelease`     |           | Shortcut for `--bump prerelease`                                          |                              |
+| `--force-bump`     |           | Force version bump even when local `package.json` version > registry      | `false`                      |
+| `--summary <text>` | `-m`      | Release summary note (used in commit message & changelog fallback)        | Auto-generated               |
+| `--registry <url>` |           | Target npm registry URL override                                          | From `.npmrc` or `npmjs.org` |
+| `--tag <name>`     |           | npm distribution tag (e.g., `latest`, `beta`, `next`)                     | `latest`                     |
+| `--access <level>` |           | Package access level: `public` or `restricted`                            | `public`                     |
+| `--otp <code>`     |           | Two-factor authentication (2FA) one-time password                         |                              |
+| `--provenance`     |           | Generate npm provenance attestation (enabled automatically in GH Actions) | `false` (`true` in GHA)      |
+| `--engine <name>`  |           | Release engine: `auto`, `changeset`, `release-it`, `internal`             | `auto`                       |
+| `--dry-run`        | `-d`      | Simulate validations, bumps, build, git, and publish without side effects | `false`                      |
+| `--skip-build`     |           | Skip running package build scripts                                        | `false`                      |
+| `--skip-git`       |           | Skip git commit, annotated tag, and remote push steps                     | `false`                      |
+| `--skip-publish`   |           | Skip publishing packages to the npm registry                              | `false`                      |
+| `--allow-dirty`    |           | Allow running with uncommitted changes in the git working tree            | `false`                      |
+| `--version`        | `-v`      | Print the installed `dropx` version                                       |                              |
+| `--help`           | `-h`      | Display CLI help and usage reference                                      |                              |
+
+---
+
+## 3. The 7-Step Release Pipeline
+
+When invoked, `dropx` executes a deterministic 7-step release pipeline:
+
+1. **`[1/7]` Pre-Flight Environment Validations**:
+   - Verifies Node.js version is `>= 20.0.0`.
+   - Verifies the working directory is inside a Git repository and has a clean working tree (unless `--allow-dirty` is passed).
+   - Verifies remote `origin` connectivity and ensures the local branch is not behind `origin/<branch>`.
+2. **`[2/7]` Registry & Authentication Verification**:
+   - Resolves the target registry URL from CLI flags, `.npmrc`, `NPM_CONFIG_REGISTRY`, or `https://registry.npmjs.org/`.
+   - Verifies registry authentication via `npm whoami --registry <url>`.
+   - Discovers all workspace packages and filters for publishable packages (`"private": false` or `"publishConfig": { "access": "public" }`), sorted topologically.
+3. **`[3/7]` Release Engine Selection**:
+   - Auto-detects `@changesets/cli` (`changeset`), `release-it` (`release-it`), or selects the built-in zero-dependency engine (`internal`).
+4. **`[4/7]` Version Resolution & Registry Inspection**:
+   - If no explicit bump flag (`--patch`, `--minor`, `--major`, `--prerelease`, `--bump`) was passed, analyzes Conventional Commits since the latest Git tag (`BREAKING CHANGE` / `!:` -> `major`, `feat` -> `minor`, otherwise `patch`).
+   - Queries the npm registry for each package's currently published `latest` version and checks maintainer ownership.
+   - Calculates the next version ensuring `targetVersion > registryVersion` (and forces a bump if a local git tag `v<version>` already exists or `--force-bump` / explicit bump is set).
+   - Updates `package.json` versions, internal workspace dependency ranges (`^`, `~`, exact), and `CHANGELOG.md`.
+5. **`[5/7]` Building Packages**:
+   - Runs root `pnpm run build` / `npm run build` if present, or iterates through each publishable package's `build` script in topological order (unless `--skip-build` is set).
+6. **`[6/7]` Git Commit, Tag & Push**:
+   - Stages changes (`git add .`) and commits (`chore(release): bump to vX.Y.Z` or custom `--summary`).
+   - Creates an annotated Git tag `vX.Y.Z` after verifying the tag does not already exist locally or on remote `origin`.
+   - Pushes the branch and annotated tag to `origin` (unless `--skip-git` or `--dry-run` is active).
+7. **`[7/7]` Publishing Packages to Registry**:
+   - Publishes each package in topological order using `pnpm publish` or `npm publish` with `--registry`, `--access`, `--no-git-checks`, `--tag`, and optional `--otp` / `--provenance` / `--dry-run`.
+   - Prints a final summary table of published packages and versions.
+
+---
+
+## 4. Engine Auto-Detection & Monorepo Behavior
+
+### Engine Selection Rules (`--engine auto`)
+
+| Engine           | Detection Trigger                                                                                                   | Execution Behavior                                                                                                                               |
+| :--------------- | :------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`changeset`**  | `.changeset/config.json` exists or `@changesets/cli` is listed in `dependencies`/`devDependencies`                  | Uses pending `.changeset/*.md` files (or generates an automated changeset if none exist), runs `changeset version`, then continues the pipeline. |
+| **`release-it`** | `.release-it.*` config file exists, `release-it` is in dependencies, or `"release-it"` key exists in `package.json` | Delegates the release workflow directly to `release-it <bump> --ci` with mapped flags (`--dry-run`, `--npm.tag`, `--npm.otp`).                   |
+| **`internal`**   | Default when neither Changesets nor Release-It is detected, or when `--engine internal` is passed                   | Uses `dropx`'s built-in SemVer bumper, Conventional Commits changelog generator, topological builder, git tagger, and package publisher.         |
+
+### Workspace Discovery & Topological Sorting
+
+`dropx` natively discovers packages across:
+
+1. **pnpm workspaces**: Parses `packages` globs from `pnpm-workspace.yaml`.
+2. **npm / Yarn workspaces**: Parses `workspaces` array or `workspaces.packages` from root `package.json`.
+3. **Lerna**: Parses `packages` globs from `lerna.json`.
+4. **Standalone package**: Falls back to root `package.json` when no workspace globs match.
+
+Internal dependencies (`dependencies` and `devDependencies`) are analyzed via depth-first topological sort so foundational packages are always versioned, built, and published before dependent packages. Cross-package version ranges (`^1.0.0`, `~1.0.0`, `1.0.0`) are updated automatically while `workspace:*` protocol specifiers are preserved for `pnpm publish`.
+
+### Registry Resolution Priority (`.npmrc`)
+
+For every package, `resolveRegistry(pkgName, options, rootDir)` resolves the target registry in order:
+
+1. `--registry <url>` CLI flag.
+2. Project `.npmrc` scoped registry (`@scope:registry=<url>`).
+3. Project `.npmrc` default registry (`registry=<url>`).
+4. `NPM_CONFIG_REGISTRY` environment variable.
+5. User `~/.npmrc` scoped registry (`@scope:registry=<url>`).
+6. User `~/.npmrc` default registry (`registry=<url>`).
+7. Fallback: `https://registry.npmjs.org/`.
+
+---
+
+## 5. Programmatic TypeScript API
+
+`dropx` exports its CLI runner, utilities, and TypeScript interfaces for custom release scripts.
+
+```typescript
+import {
+  bumpVersion,
+  checkNpmWhoami,
+  cli,
+  compareSemVer,
+  DEFAULT_OPTIONS,
+  detectBumpFromCommits,
+  detectEngine,
+  fetchNpmRegistryInfo,
+  findPackages,
+  formatConventionalChangelog,
+  getConventionalCommits,
+  getLatestTag,
+  isSemVerGreaterThan,
+  parseArgs,
+  parseConventionalCommit,
+  parseSemVer,
+  resolveRegistry,
+  resolveTargetVersion,
+  sortPackagesTopologically,
+  updateChangelog,
+} from 'dropx';
+
+// 1. Run the CLI pipeline programmatically
+await cli(['--dry-run', '--minor']);
+
+// 2. Discover and topologically sort publishable workspace packages
+const packages = sortPackagesTopologically(
+  findPackages(process.cwd()).filter((pkg) => pkg.isPublishable)
+);
+
+// 3. Detect recommended bump from Conventional Commits since last tag
+const bumpInfo = detectBumpFromCommits(process.cwd());
+console.log(`Recommended bump: ${bumpInfo.bump} (${bumpInfo.reason})`);
+
+// 4. Inspect registry and calculate target version
+for (const pkg of packages) {
+  const registry = resolveRegistry(pkg.name, {}, process.cwd());
+  const regInfo = await fetchNpmRegistryInfo(pkg.name, registry);
+  const { targetVersion, bumpNeeded, reason } = resolveTargetVersion(
+    pkg.version,
+    regInfo.latestVersion,
+    bumpInfo.bump
+  );
+  console.log(`${pkg.name}: ${pkg.version} -> ${targetVersion} (${reason})`);
+}
+```
+
+---
+
+## 6. Project & CI/CD Integration Recipes
+
+### `package.json` Scripts
+
+Add standard release scripts to the root `package.json`:
+
+```json
+{
+  "scripts": {
+    "release": "dropx",
+    "release:dry": "dropx --dry-run",
+    "release:patch": "dropx --patch",
+    "release:minor": "dropx --minor",
+    "release:major": "dropx --major"
+  }
+}
+```
+
+### GitHub Actions Release Workflow
+
+```yaml
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'SemVer bump level (auto, patch, minor, major, prerelease)'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+          - prerelease
+
+permissions:
+  contents: write
+  id-token: write # Required for npm provenance attestation
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run dropx release
+        run: |
+          if [ "${{ inputs.bump }}" = "auto" ]; then
+            pnpm exec dropx --provenance
+          else
+            pnpm exec dropx --bump ${{ inputs.bump }} --provenance
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+---
+
+## 7. Verification & Troubleshooting
+
+1. **Always Dry-Run First**: Before executing a live release, run `pnpm exec dropx --dry-run` to validate Node/Git status, registry authentication, package discovery, and target version calculations without mutating files.
+2. **Authentication Errors (`ENEEDAUTH` / `npm whoami` failed)**:
+   - Ensure `NPM_TOKEN` or `NODE_AUTH_TOKEN` is exported in your environment, or authenticate interactively via `npm login --registry <url>`.
+3. **Uncommitted Changes Error**:
+   - Commit or stash working tree modifications before running `dropx`, or pass `--allow-dirty` only when intentional.
+4. **No Publishable Packages Found**:
+   - Verify that target packages do not have `"private": true` in `package.json`, or explicitly configure `"publishConfig": { "access": "public" }`.
+5. **Existing Git Tag Conflict (`Git tag "vX.Y.Z" already exists`)**:
+   - If a tag already exists for the current local version, `dropx` automatically forces a version bump when calculating target versions. If a tag from a partial previous release blocks tagging, pass `--force-bump` or an explicit bump flag (`--patch`, `--minor`, `--major`).

@@ -1,6 +1,6 @@
 /**
  * @file src/types.ts
- * Type definitions and interfaces for relsx.
+ * Type definitions and interfaces for dropx.
  */
 
 export type BumpType = 'patch' | 'minor' | 'major' | 'prerelease';

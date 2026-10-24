@@ -1,5 +1,5 @@
 name: 🐛 Bug Report
-description: Create a report to help us fix a bug or unexpected behavior in relsx
+description: Create a report to help us fix a bug or unexpected behavior in dropx
 title: 'fix: '
 labels: ['bug', 'triage']
 body:
@@ -21,7 +21,7 @@ body:
       label: Steps to Reproduce
       description: What steps did you take before encountering the issue?
       placeholder: |
-        1. Run `relsx --dry-run`
+        1. Run `dropx --dry-run`
         2. Inspect output...
     validations:
       required: true
@@ -61,10 +61,10 @@ body:
     validations:
       required: true
   - type: input
-    id: relsx-version
+    id: dropx-version
     attributes:
-      label: relsx Version
-      description: Output of `relsx --version`
+      label: dropx Version
+      description: Output of `dropx --version`
       placeholder: e.g. 0.0.1
     validations:
       required: true

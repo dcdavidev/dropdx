@@ -1,6 +1,6 @@
 /**
  * @file src/index.ts
- * Programmatic API for relsx.
+ * Programmatic API for dropx.
  */
 
 export { cli, cli as run } from './cli.js';

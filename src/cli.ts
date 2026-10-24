@@ -1,6 +1,6 @@
 /**
  * @file src/cli.ts
- * CLI orchestrator for relsx automated release pipeline.
+ * CLI orchestrator for dropx automated release pipeline.
  */
 
 import { readFileSync } from 'node:fs';
@@ -10,13 +10,13 @@ import { fileURLToPath } from 'node:url';
 
 import { parseArgs } from './config.js';
 import { runChangesetVersion } from './engines/changeset.js';
-import { detectEngine } from './engines/index.js';
-import { runReleaseIt } from './engines/release-it.js';
 import {
   buildPackages,
   bumpPackages,
   publishPackages,
-} from './engines/relsx-engine.js';
+} from './engines/dropx-engine.js';
+import { detectEngine } from './engines/index.js';
+import { runReleaseIt } from './engines/release-it.js';
 import type {
   GitEnvironmentInfo,
   NpmRegistryInfo,
@@ -51,11 +51,11 @@ import { checkNpmWhoami, fetchNpmRegistryInfo } from './utils/registry.js';
 import { isSemVerGreaterThan } from './utils/semver.js';
 
 /**
- * Returns package.json version of relsx itself.
+ * Returns package.json version of dropx itself.
  *
  * @returns Version string.
  */
-function getRelsxVersion(): string {
+function getDropxVersion(): string {
   try {
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const pkgPath = path.join(__dirname, '..', 'package.json');
@@ -87,7 +87,7 @@ function hasOwnershipAccess(
 }
 
 /**
- * Executes the full relsx release pipeline.
+ * Executes the full dropx release pipeline.
  *
  * @param argv - Process CLI arguments.
  */
@@ -102,7 +102,7 @@ export async function cli(
   }
 
   if (options.version) {
-    console.log(`relsx v${getRelsxVersion()}`);
+    console.log(`dropx v${getDropxVersion()}`);
     return;
   }
 

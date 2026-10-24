@@ -17,7 +17,7 @@ describe('Package discovery and topological sort', () => {
     const packages = findPackages(process.cwd());
     assert.ok(packages.length > 0);
     const selfPkg = packages.find(
-      (p) => p.name === '@dcdavidev/relsx' || p.name === 'relsx'
+      (p) => p.name === 'dropx' || p.name === '@dcdavidev/dropx'
     );
     assert.ok(selfPkg);
     assert.equal(selfPkg.isPublishable, true);

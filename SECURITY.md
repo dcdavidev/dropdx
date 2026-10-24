@@ -1,12 +1,12 @@
 # Security Policy
 
-The security of **relsx** and the integrity of software supply chains are paramount. We appreciate any efforts to responsibly disclose vulnerabilities.
+The security of **dropx** and the integrity of software supply chains are paramount. We appreciate any efforts to responsibly disclose vulnerabilities.
 
 ---
 
 ## Supported Versions
 
-Only the latest active versions of **relsx** receive security updates and bug fixes:
+Only the latest active versions of **dropx** receive security updates and bug fixes:
 
 | Version   | Supported          |
 | :-------- | :----------------- |
@@ -17,17 +17,17 @@ Only the latest active versions of **relsx** receive security updates and bug fi
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability or potential threat in **relsx**, please do **NOT** open a public issue or discuss it in public forums.
+If you discover a security vulnerability or potential threat in **dropx**, please do **NOT** open a public issue or discuss it in public forums.
 
 Instead, please report it through one of the following private channels:
 
 1. **GitHub Private Vulnerability Advisory** (Preferred):
-   - Navigate to the [Security Advisories](https://github.com/dcdavidev/relsx/security/advisories) tab of this repository.
+   - Navigate to the [Security Advisories](https://github.com/dcdavidev/dropx/security/advisories) tab of this repository.
    - Click **"Report a vulnerability"** to submit your report confidentially.
 
 2. **Direct Email**:
    - Send an email to **Davide Di Criscito** at: `dcdavidev@gmail.com`
-   - Include the subject line: `[SECURITY] relsx Vulnerability Report`
+   - Include the subject line: `[SECURITY] dropx Vulnerability Report`
 
 ---
 
@@ -49,4 +49,4 @@ To help us triage and investigate the issue quickly, please provide as much rele
 2. **Assessment & Validation**: We will confirm the vulnerability and assess its severity, scope, and impact.
 3. **Patch & Coordinated Disclosure**: A patch will be developed and verified. We will coordinate a disclosure timeline with you before releasing the fix publicly.
 
-Thank you for helping us keep **relsx** and the developer community secure!
+Thank you for helping us keep **dropx** and the developer community secure!
