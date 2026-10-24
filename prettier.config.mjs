@@ -11,6 +11,15 @@ const config = {
   plugins: baseConfig.plugins?.map((plugin) =>
     typeof plugin === 'string' ? require.resolve(plugin) : plugin
   ),
+  overrides: [
+    ...(baseConfig.overrides ?? []),
+    {
+      files: '*.jsonc',
+      options: {
+        trailingComma: 'none',
+      },
+    },
+  ],
 };
 
 export default config;

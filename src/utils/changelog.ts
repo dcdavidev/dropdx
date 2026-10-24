@@ -14,17 +14,20 @@ import { getConventionalCommits, getLatestTag } from './git.js';
  *
  * @param commits - Array of parsed conventional commits.
  * @param summary - Fallback summary text if no commits are provided.
+ * @param isConventionalEnabled - Optional explicit conventionalCommits configuration flag.
  * @returns Markdown formatted changelog section.
  */
 export function formatConventionalChangelog(
   commits: ConventionalCommit[],
-  summary = 'Release version bump'
+  summary = 'Release version bump',
+  isConventionalEnabled?: boolean
 ): string {
   if (commits.length === 0) {
     return `* ${summary}\n`;
   }
 
-  const hasConventional = commits.some((c) => c.isConventional);
+  const hasConventional =
+    isConventionalEnabled !== false && commits.some((c) => c.isConventional);
   const breaking = commits.filter((c) => c.isBreaking);
 
   // If history does not use Conventional Commits, format a clean list of changes
@@ -125,6 +128,7 @@ export function formatConventionalChangelog(
  * @param summary - Summary description.
  * @param dateStr - ISO Date string.
  * @param commits - Optional pre-filtered conventional commits.
+ * @param isConventionalEnabled - Optional explicit conventionalCommits configuration flag.
  * @returns Path to CHANGELOG.md.
  */
 export function updateChangelog(
@@ -132,7 +136,8 @@ export function updateChangelog(
   newVersion: string,
   summary = 'Release version bump',
   dateStr = new Date().toISOString().slice(0, 10),
-  commits?: ConventionalCommit[]
+  commits?: ConventionalCommit[],
+  isConventionalEnabled?: boolean
 ): string {
   const changelogPath = path.join(pkgDir, 'CHANGELOG.md');
 
@@ -140,7 +145,11 @@ export function updateChangelog(
   const resolvedCommits =
     commits ?? getConventionalCommits(getLatestTag(pkgDir), pkgDir);
 
-  const bodyContent = formatConventionalChangelog(resolvedCommits, summary);
+  const bodyContent = formatConventionalChangelog(
+    resolvedCommits,
+    summary,
+    isConventionalEnabled
+  );
   const entry = `## v${newVersion} - ${dateStr}\n\n${bodyContent}\n\n`;
 
   if (!existsSync(changelogPath)) {

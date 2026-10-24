@@ -74,6 +74,7 @@ npx @dcdavidev/dropdx [options]
 | `--access <level>` |           | Package access level: `public` or `restricted`                            | `public`                     |
 | `--otp <code>`     |           | Two-factor authentication (2FA) one-time password                         |                              |
 | `--provenance`     |           | Generate npm provenance attestation (enabled automatically in GH Actions) | `false` (`true` in GHA)      |
+| `--config <path>`  | `-c`      | Path to configuration file                                                | `.config/dropdx.config.json` |
 | `--engine <name>`  |           | Release engine: `auto`, `changeset`, `release-it`, `internal`             | `auto`                       |
 | `--dry-run`        | `-d`      | Simulate validations, bumps, build, git, and publish without side effects | `false`                      |
 | `--skip-build`     |           | Skip running package build scripts                                        | `false`                      |
@@ -122,11 +123,16 @@ When invoked, `dropdx` executes a deterministic 7-step release pipeline:
 
 ### Engine Selection Rules (`--engine auto`)
 
-| Engine           | Detection Trigger                                                                                                   | Execution Behavior                                                                                                                               |
-| :--------------- | :------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`changeset`**  | `.changeset/config.json` exists or `@changesets/cli` is listed in `dependencies`/`devDependencies`                  | Uses pending `.changeset/*.md` files (or generates an automated changeset if none exist), runs `changeset version`, then continues the pipeline. |
-| **`release-it`** | `.release-it.*` config file exists, `release-it` is in dependencies, or `"release-it"` key exists in `package.json` | Delegates the release workflow directly to `release-it <bump> --ci` with mapped flags (`--dry-run`, `--npm.tag`, `--npm.otp`).                   |
-| **`internal`**   | Default when neither Changesets nor Release-It is detected, or when `--engine internal` is passed                   | Uses `dropdx`'s built-in SemVer bumper, Conventional Commits changelog generator, topological builder, git tagger, and package publisher.        |
+| Engine                 | Detection Trigger                                                                                                   | Execution Behavior                                                                                                                               |
+| :--------------------- | :------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`changeset`**        | `.changeset/config.json` exists or `@changesets/cli` is listed in `dependencies`/`devDependencies`                  | Uses pending `.changeset/*.md` files (or generates an automated changeset if none exist), runs `changeset version`, then continues the pipeline. |
+| **`release-it`**       | `.release-it.*` config file exists, `release-it` is in dependencies, or `"release-it"` key exists in `package.json` | Delegates the release workflow directly to `release-it <bump> --ci` with mapped flags (`--dry-run`, `--npm.tag`, `--npm.otp`).                   |
+| **`semantic-release`** | `.releaserc*` / `release.config.*` exists, `semantic-release` is in dependencies, or `"release"` in `package.json`  | Delegates the release workflow directly to `semantic-release` (`--dry-run`, `--no-ci`).                                                          |
+| **`lerna`**            | `lerna.json` exists or `lerna` is listed in `dependencies`/`devDependencies`                                        | Runs `lerna version <bump> --yes --no-git-tag-version --no-push`, then continues with `dropdx` build, git tag/push, and publish steps.           |
+| **`bumpp`**            | `bump.config.*` exists or `bumpp` is listed in `dependencies`/`devDependencies`                                     | Runs `bumpp <bump> --yes --no-commit --no-tag --no-push` and updates `CHANGELOG.md`, then continues with build, git tag/push, and publish.       |
+| **`standard-version`** | `.versionrc*` exists or `commit-and-tag-version` / `standard-version` is in dependencies                            | Runs `commit-and-tag-version` (or `standard-version`) `--release-as <bump> --skip.commit --skip.tag`, then continues the pipeline.               |
+| **`np`**               | `.np-config.*` exists, `np` is in dependencies, or `"np"` key exists in `package.json`                              | Delegates the release workflow to `np <bump> --yolo`.                                                                                            |
+| **`internal`**         | Default when no external release tool is detected, or when `--engine internal` is passed                            | Uses `dropdx`'s built-in SemVer bumper, Conventional Commits changelog generator, topological builder, git tagger, and package publisher.        |
 
 ### Workspace Discovery & Topological Sorting
 
@@ -209,6 +215,29 @@ for (const pkg of packages) {
 ---
 
 ## 6. Project & CI/CD Integration Recipes
+
+### `.config/dropdx.config.{json,jsonc,yaml,yml,toml}` Configuration File
+
+`dropdx` automatically discovers configuration files in `.config/` (or the project root, or via `--config <path>`) across **JSON**, **JSONC**, **YAML** (`.yaml` / `.yml`), and **TOML** (`.toml`) formats:
+
+- `.config/dropdx.config.json` _(default)_
+- `.config/dropdx.config.jsonc`
+- `.config/dropdx.config.yaml` / `.config/dropdx.config.yml`
+- `.config/dropdx.config.toml`
+- `dropdx.config.{json,jsonc,yaml,yml,toml}`
+
+Note that package access level (`"public"` or `"restricted"`) is configured in `package.json` under `"publishConfig": { "access": "public" }`, and per-release options like `--bump` or `--tag` are passed via CLI flags, while workflow options belong in `dropdx.config.*`:
+
+```json
+{
+  "conventionalCommits": true,
+  "engine": "auto",
+  "skipBuild": false,
+  "skipGit": false,
+  "skipPublish": false,
+  "allowDirty": false
+}
+```
 
 ### `package.json` Scripts
 

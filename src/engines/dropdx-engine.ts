@@ -130,7 +130,14 @@ export function bumpPackages(
     }
 
     writeFileSync(pkgJsonPath, `${JSON.stringify(json, null, 2)}\n`, 'utf8');
-    updateChangelog(pkg.directory, nextVer, options.summary);
+    updateChangelog(
+      pkg.directory,
+      nextVer,
+      options.summary,
+      undefined,
+      undefined,
+      options.conventionalCommits
+    );
   }
 
   return versionBumps;
@@ -231,9 +238,14 @@ export function publishPackages(
       publishCmdParts.push('npm publish');
     }
 
+    const pkgAccess =
+      (pkg.publishConfig.access as 'public' | 'restricted' | undefined) ||
+      options.access ||
+      'public';
+
     publishCmdParts.push(
       `--registry ${targetRegistry}`,
-      `--access ${options.access || 'public'}`,
+      `--access ${pkgAccess}`,
       '--no-git-checks',
       `--tag ${options.tag || 'latest'}`
     );

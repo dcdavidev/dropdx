@@ -1,0 +1,8 @@
+# dropdx TOML configuration example (.config/dropdx.config.toml)
+conventionalCommits = true
+engine = 'auto'
+# registry = "https://registry.npmjs.org/"
+skipBuild = false
+skipGit = false
+skipPublish = false
+allowDirty = false

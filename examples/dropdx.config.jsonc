@@ -1,0 +1,16 @@
+{
+  // Enable Conventional Commits changelog categorization and release commit formatting
+  "conventionalCommits": true,
+
+  // Release engine selection: "auto" | "changeset" | "release-it" | "internal"
+  "engine": "auto",
+
+  // Optional custom registry override (defaults to .npmrc or https://registry.npmjs.org/)
+  // "registry": "https://registry.npmjs.org/",
+
+  // Pipeline step controls
+  "skipBuild": false,
+  "skipGit": false,
+  "skipPublish": false,
+  "allowDirty": false
+}

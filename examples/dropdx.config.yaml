@@ -1,0 +1,8 @@
+# dropdx YAML configuration example (.config/dropdx.config.yaml)
+conventionalCommits: true
+engine: auto
+# registry: https://registry.npmjs.org/
+skipBuild: false
+skipGit: false
+skipPublish: false
+allowDirty: false

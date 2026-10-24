@@ -126,7 +126,8 @@ ${purple(bold('Opzioni Registry & Pubblicazione:'))}
   ${cyan('--provenance')}                  Genera provenance attestation (utile in CI)
 
 ${purple(bold('Opzioni Engine & Workflow:'))}
-  ${cyan('--engine <auto|changeset|release-it|internal>')} Forza l'engine di release (default: auto)
+  ${cyan('-c, --config <path>')}             File di configurazione (default: .config/dropdx.config.json)
+  ${cyan('--engine <name>')}                 Engine: auto, changeset, release-it, semantic-release, lerna, bumpp, standard-version, np, internal
   ${cyan('-d, --dry-run')}                 Simula controlli, bump, build e publish senza modifiche remote
   ${cyan('--skip-build')}                  Salta la fase di build dei pacchetti
   ${cyan('--skip-git')}                    Salta commit, tag e push su git

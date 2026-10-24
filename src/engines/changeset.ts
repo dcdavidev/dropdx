@@ -74,6 +74,17 @@ export function runChangesetVersion(
   options: CliOptions
 ): string | null {
   const existingChangesets = getPendingChangesets(root);
+
+  if (options.dryRun) {
+    const dryRunDetail =
+      existingChangesets.length > 0
+        ? `[DRY-RUN] Found ${bold(String(existingChangesets.length))} pending changeset(s): ${existingChangesets.join(', ')}`
+        : `[DRY-RUN] Would create automatic changeset (${bold(options.bump)})`;
+    logInfo(dryRunDetail);
+    logInfo('[DRY-RUN] Would execute "changeset version"');
+    return null;
+  }
+
   let createdPath: string | null = null;
 
   if (existingChangesets.length > 0) {

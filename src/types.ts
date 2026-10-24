@@ -5,13 +5,38 @@
 
 export type BumpType = 'patch' | 'minor' | 'major' | 'prerelease';
 
-export type EngineType = 'auto' | 'changeset' | 'release-it' | 'internal';
+export type EngineType =
+  | 'auto'
+  | 'changeset'
+  | 'release-it'
+  | 'semantic-release'
+  | 'lerna'
+  | 'bumpp'
+  | 'standard-version'
+  | 'np'
+  | 'internal';
 
 export type AccessType = 'public' | 'restricted';
+
+export interface DropdxConfig {
+  $schema?: string;
+  conventionalCommits?: boolean;
+  registry?: string;
+  engine?: EngineType;
+  dryRun?: boolean;
+  skipBuild?: boolean;
+  skipGit?: boolean;
+  skipPublish?: boolean;
+  allowDirty?: boolean;
+  provenance?: boolean;
+  forceBump?: boolean;
+  summary?: string;
+}
 
 export interface CliOptions {
   bump: BumpType;
   isExplicitBump: boolean;
+  conventionalCommits?: boolean;
   dryRun: boolean;
   registry?: string;
   tag: string;
@@ -25,6 +50,7 @@ export interface CliOptions {
   summary?: string;
   provenance: boolean;
   isForceBump: boolean;
+  configPath?: string;
   help?: boolean;
   version?: boolean;
 }

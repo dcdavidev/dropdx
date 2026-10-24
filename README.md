@@ -135,28 +135,29 @@ Usage:
 
 ### Options Table
 
-| Option             | Shorthand | Description                                                     | Default                    |
-| :----------------- | :-------- | :-------------------------------------------------------------- | :------------------------- |
-| `--bump <type>`    |           | SemVer increment level: `patch`, `minor`, `major`, `prerelease` | `patch`                    |
-| `--patch`          |           | Shortcut for `--bump patch`                                     |                            |
-| `--minor`          |           | Shortcut for `--bump minor`                                     |                            |
-| `--major`          |           | Shortcut for `--bump major`                                     |                            |
-| `--prerelease`     |           | Shortcut for `--bump prerelease`                                |                            |
-| `--force-bump`     |           | Force version bump even when local version > registry version   | `false`                    |
-| `--summary <text>` | `-m`      | Release summary note (used in commit message & changelog)       | Auto-generated             |
-| `--registry <url>` |           | Target npm registry URL                                         | From `.npmrc` or npmjs.org |
-| `--tag <name>`     |           | npm dist-tag (e.g., `latest`, `beta`, `next`)                   | `latest`                   |
-| `--access <level>` |           | Package access level: `public` or `restricted`                  | `public`                   |
-| `--otp <code>`     |           | Two-factor authentication (2FA) one-time password               |                            |
-| `--provenance`     |           | Generate npm provenance attestation (useful in CI)              | `false`                    |
-| `--engine <name>`  |           | Release engine: `auto`, `changeset`, `release-it`, `internal`   | `auto`                     |
-| `--dry-run`        | `-d`      | Simulate validations, bumps, build, and publish without changes | `false`                    |
-| `--skip-build`     |           | Skip running package build scripts                              | `false`                    |
-| `--skip-git`       |           | Skip git commit, tag, and push steps                            | `false`                    |
-| `--skip-publish`   |           | Skip publishing packages to the registry                        | `false`                    |
-| `--allow-dirty`    |           | Allow release even with uncommitted changes in git repository   | `false`                    |
-| `--help`           | `-h`      | Display help screen                                             |                            |
-| `--version`        | `-v`      | Display `dropdx` version                                        |                            |
+| Option             | Shorthand | Description                                                     | Default                      |
+| :----------------- | :-------- | :-------------------------------------------------------------- | :--------------------------- |
+| `--bump <type>`    |           | SemVer increment level: `patch`, `minor`, `major`, `prerelease` | `patch`                      |
+| `--patch`          |           | Shortcut for `--bump patch`                                     |                              |
+| `--minor`          |           | Shortcut for `--bump minor`                                     |                              |
+| `--major`          |           | Shortcut for `--bump major`                                     |                              |
+| `--prerelease`     |           | Shortcut for `--bump prerelease`                                |                              |
+| `--force-bump`     |           | Force version bump even when local version > registry version   | `false`                      |
+| `--summary <text>` | `-m`      | Release summary note (used in commit message & changelog)       | Auto-generated               |
+| `--registry <url>` |           | Target npm registry URL                                         | From `.npmrc` or npmjs.org   |
+| `--tag <name>`     |           | npm dist-tag (e.g., `latest`, `beta`, `next`)                   | `latest`                     |
+| `--access <level>` |           | Package access level: `public` or `restricted`                  | `public`                     |
+| `--otp <code>`     |           | Two-factor authentication (2FA) one-time password               |                              |
+| `--provenance`     |           | Generate npm provenance attestation (useful in CI)              | `false`                      |
+| `--config <path>`  | `-c`      | Path to configuration file                                      | `.config/dropdx.config.json` |
+| `--engine <name>`  |           | Release engine: `auto`, `changeset`, `release-it`, `internal`   | `auto`                       |
+| `--dry-run`        | `-d`      | Simulate validations, bumps, build, and publish without changes | `false`                      |
+| `--skip-build`     |           | Skip running package build scripts                              | `false`                      |
+| `--skip-git`       |           | Skip git commit, tag, and push steps                            | `false`                      |
+| `--skip-publish`   |           | Skip publishing packages to the registry                        | `false`                      |
+| `--allow-dirty`    |           | Allow release even with uncommitted changes in git repository   | `false`                      |
+| `--help`           | `-h`      | Display help screen                                             |                              |
+| `--version`        | `-v`      | Display `dropdx` version                                        |                              |
 
 ---
 
@@ -234,18 +235,25 @@ registry=https://registry.npmjs.org/
 
 ## Engine Auto-Detection
 
-`dropdx` adapts dynamically to existing tooling in your repository:
+`dropdx` adapts dynamically to existing release and versioning tooling in your repository:
 
-| Engine           | When Selected                                                                         | Behavior                                                                                                                                   |
-| :--------------- | :------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| **`changeset`**  | Detected when `@changesets/cli` is in dependencies or `.changeset/config.json` exists | Automatically creates a release changeset if none exists, runs `changeset version`, and runs `changeset publish`.                          |
-| **`release-it`** | Detected when `release-it` is in dependencies or `.release-it.json` exists            | Executes `release-it` with non-interactive flags.                                                                                          |
-| **`internal`**   | Default fallback when no third-party release tool is found                            | Uses the built-in, zero-dependency release engine with SemVer comparison, topological workspace resolution, and direct package publishing. |
+| Engine                 | When Selected                                                                                          | Behavior                                                                                                                                   |
+| :--------------------- | :----------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| **`changeset`**        | Detected when `@changesets/cli` is in dependencies or `.changeset/config.json` exists                  | Automatically creates a release changeset if none exists, runs `changeset version`, then continues build, git tag/push, and publish.       |
+| **`release-it`**       | Detected when `release-it` is in dependencies, `.release-it.*` exists, or `package.json#release-it`    | Delegates the release workflow to `release-it` with non-interactive CI flags.                                                              |
+| **`semantic-release`** | Detected when `semantic-release` is in dependencies, `.releaserc*` / `release.config.*`, or `#release` | Delegates the release workflow to `semantic-release` (passing `--dry-run` / `--no-ci` when appropriate).                                   |
+| **`lerna`**            | Detected when `lerna` is in dependencies or `lerna.json` exists                                        | Executes `lerna version <bump> --yes --no-git-tag-version --no-push`, then continues build, git tag/push, and publish.                     |
+| **`bumpp`**            | Detected when `bumpp` is in dependencies or `bump.config.*` exists                                     | Executes `bumpp <bump> --yes --no-commit --no-tag --no-push` and updates `CHANGELOG.md`, then continues build, git tag/push, and publish.  |
+| **`standard-version`** | Detected when `commit-and-tag-version` / `standard-version` is in dependencies or `.versionrc*` exists | Executes `commit-and-tag-version` (or `standard-version`) `--release-as <bump> --skip.commit --skip.tag`, then continues the pipeline.     |
+| **`np`**               | Detected when `np` is in dependencies, `.np-config.*` exists, or `package.json#np`                     | Delegates the release workflow to `np <bump> --yolo`.                                                                                      |
+| **`internal`**         | Default fallback when no third-party release tool is found                                             | Uses the built-in, zero-dependency release engine with SemVer comparison, topological workspace resolution, and direct package publishing. |
 
-You can explicitly force an engine at any time with `--engine <name>`:
+You can explicitly force an engine at any time with `--engine <name>` (or `"engine"` in `dropdx.config.*`):
 
 ```bash
 dropdx --engine changeset
+dropdx --engine lerna
+dropdx --engine bumpp
 dropdx --engine internal
 ```
 

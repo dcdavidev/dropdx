@@ -4,13 +4,26 @@
  */
 
 export { cli, cli as run } from './cli.js';
-export { DEFAULT_OPTIONS, parseArgs } from './config.js';
-export { detectEngine } from './engines/index.js';
+export {
+  CONFIG_SEARCH_PATHS,
+  DEFAULT_CONFIG_PATH,
+  DEFAULT_OPTIONS,
+  loadConfigFile,
+  parseArgs,
+} from './config.js';
+export { detectEngine, SUPPORTED_ENGINES } from './engines/index.js';
 export * from './types.js';
 export {
   formatConventionalChangelog,
   updateChangelog,
 } from './utils/changelog.js';
+export {
+  parseConfigContent,
+  parseJsoncConfig,
+  parseTomlConfig,
+  parseYamlConfig,
+  stripJsonCommentsAndTrailingCommas,
+} from './utils/config-parser.js';
 export {
   analyzeCommitsForBump,
   CONVENTIONAL_COMMIT_TYPES,

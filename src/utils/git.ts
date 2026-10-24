@@ -322,12 +322,14 @@ export function getConventionalCommits(
  * @param commits - Parsed commits since the previous tag.
  * @param latestTag - Previous git tag name, if any.
  * @param isFallbackConventional - Fallback when commits list is empty.
+ * @param isConfiguredConventional - Explicit conventionalCommits config setting, if set.
  * @returns Detected bump type, explanation, commit list, and conventional history flag.
  */
 export function analyzeCommitsForBump(
   commits: ConventionalCommit[],
   latestTag: string | null = null,
-  isFallbackConventional = false
+  isFallbackConventional = false,
+  isConfiguredConventional?: boolean
 ): BumpDetectionResult {
   if (commits.length === 0) {
     return {
@@ -335,12 +337,13 @@ export function analyzeCommitsForBump(
       reason:
         'No new git commits detected since previous tag; defaulting to patch',
       commits: [],
-      isConventionalHistory: isFallbackConventional,
+      isConventionalHistory: isConfiguredConventional ?? isFallbackConventional,
     };
   }
 
   const conventionalCommits = commits.filter((c) => c.isConventional);
-  const isConventionalHistory = conventionalCommits.length > 0;
+  const isConventionalHistory =
+    isConfiguredConventional ?? conventionalCommits.length > 0;
 
   if (!isConventionalHistory) {
     const breakingCommit = commits.find((c) => c.isBreaking);
@@ -397,10 +400,13 @@ export function analyzeCommitsForBump(
  * and recommends the appropriate SemVer bump level.
  *
  * @param rootDir - Working directory for git inspection.
+ * @param options - Optional configuration flags.
+ * @param options.conventionalCommits - Explicit conventional commits setting.
  * @returns Detected bump type ('major' | 'minor' | 'patch'), explanation, commit list, and conventional status.
  */
 export function detectBumpFromCommits(
-  rootDir: string = process.cwd()
+  rootDir: string = process.cwd(),
+  options: { conventionalCommits?: boolean } = {}
 ): BumpDetectionResult {
   const latestTag = getLatestTag(rootDir);
   const commits = getConventionalCommits(latestTag, rootDir);
@@ -411,5 +417,10 @@ export function detectBumpFromCommits(
     isFallbackConventional = recentCommits.some((c) => c.isConventional);
   }
 
-  return analyzeCommitsForBump(commits, latestTag, isFallbackConventional);
+  return analyzeCommitsForBump(
+    commits,
+    latestTag,
+    isFallbackConventional,
+    options.conventionalCommits
+  );
 }

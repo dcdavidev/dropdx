@@ -1,0 +1,8 @@
+{
+  "conventionalCommits": true,
+  "engine": "auto",
+  "skipBuild": false,
+  "skipGit": false,
+  "skipPublish": false,
+  "allowDirty": false
+}

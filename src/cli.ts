@@ -9,6 +9,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 import { parseArgs } from './config.js';
+import { runBumppVersion } from './engines/bumpp.js';
 import { runChangesetVersion } from './engines/changeset.js';
 import {
   buildPackages,
@@ -16,11 +17,18 @@ import {
   publishPackages,
 } from './engines/dropdx-engine.js';
 import { detectEngine } from './engines/index.js';
+import { runLernaVersion } from './engines/lerna.js';
+import { runNp } from './engines/np.js';
 import { runReleaseIt } from './engines/release-it.js';
+import { runSemanticRelease } from './engines/semantic-release.js';
+import { runStandardVersion } from './engines/standard-version.js';
 import type {
+  CliOptions,
+  EngineType,
   GitEnvironmentInfo,
   NpmRegistryInfo,
   VersionBump,
+  WorkspacePackage,
 } from './types.js';
 import {
   bold,
@@ -88,6 +96,130 @@ function hasOwnershipAccess(
 }
 
 /**
+ * Executes a full-lifecycle delegated release engine (`release-it`, `semantic-release`, `np`)
+ * if selected, and returns `true` when the pipeline has been delegated.
+ *
+ * @param engine - Selected release engine.
+ * @param rootDir - Workspace root directory.
+ * @param options - CLI options.
+ * @returns True if delegated and completed.
+ */
+function didRunDelegatedEngine(
+  engine: Exclude<EngineType, 'auto'>,
+  rootDir: string,
+  options: CliOptions
+): boolean {
+  const runners: Partial<
+    Record<
+      Exclude<EngineType, 'auto'>,
+      (root: string, opts: CliOptions) => void
+    >
+  > = {
+    'release-it': runReleaseIt,
+    'semantic-release': runSemanticRelease,
+    np: runNp,
+  };
+
+  const runner = runners[engine];
+  if (!runner) {
+    return false;
+  }
+
+  logInfo(`Delegating release workflow to ${engine}...`);
+  try {
+    runner(rootDir, options);
+    logSuccess(`Release workflow handled by ${engine} finished.`);
+    return true;
+  } catch (error: unknown) {
+    const err = error as Error;
+    logError(`${engine} failed: ${err.message}`);
+    process.exit(1);
+  }
+}
+
+/**
+ * Executes the version bumping and changelog phase using the selected engine
+ * (`changeset`, `lerna`, `bumpp`, `standard-version`, or `internal`).
+ *
+ * @param engine - Selected release engine.
+ * @param rootDir - Workspace root directory.
+ * @param publishablePackages - Publishable workspace packages.
+ * @param initialRegistryInfo - Registry metadata map.
+ * @param options - CLI options.
+ * @returns Version bumps list and updated version map.
+ */
+function executeVersionBumpPhase(
+  engine: Exclude<EngineType, 'auto'>,
+  rootDir: string,
+  publishablePackages: WorkspacePackage[],
+  initialRegistryInfo: Map<string, NpmRegistryInfo>,
+  options: CliOptions
+): {
+  versionBumps: VersionBump[];
+  updatedVersionsMap: Map<string, string>;
+} {
+  if (engine === 'internal') {
+    const versionBumps = bumpPackages(
+      publishablePackages,
+      initialRegistryInfo,
+      options
+    );
+    const updatedVersionsMap = new Map(
+      versionBumps.map((b) => [b.name, b.newVersion])
+    );
+    return { versionBumps, updatedVersionsMap };
+  }
+
+  switch (engine) {
+    case 'changeset': {
+      runChangesetVersion(rootDir, publishablePackages, options);
+      break;
+    }
+    case 'lerna': {
+      runLernaVersion(rootDir, options);
+      break;
+    }
+    case 'bumpp': {
+      runBumppVersion(rootDir, publishablePackages, options);
+      break;
+    }
+    case 'standard-version': {
+      runStandardVersion(rootDir, publishablePackages, options);
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+
+  if (options.dryRun) {
+    const versionBumps = bumpPackages(
+      publishablePackages,
+      initialRegistryInfo,
+      options
+    );
+    const updatedVersionsMap = new Map(
+      versionBumps.map((b) => [b.name, b.newVersion])
+    );
+    return { versionBumps, updatedVersionsMap };
+  }
+
+  const reloaded = findPackages(rootDir).filter((p) => p.isPublishable);
+  const updatedVersionsMap = new Map(reloaded.map((p) => [p.name, p.version]));
+  const versionBumps: VersionBump[] = publishablePackages.map((pkg) => {
+    const nextVer = updatedVersionsMap.get(pkg.name) || pkg.version;
+    return {
+      name: pkg.name,
+      oldVersion: pkg.version,
+      newVersion: nextVer,
+      bumped: pkg.version !== nextVer,
+    };
+  });
+
+  return { versionBumps, updatedVersionsMap };
+}
+
+/**
  * Executes the full dropdx release pipeline.
  *
  * @param argv - Process CLI arguments.
@@ -95,7 +227,8 @@ function hasOwnershipAccess(
 export async function cli(
   argv: string[] = process.argv.slice(2)
 ): Promise<void> {
-  const options = parseArgs(argv);
+  const rootDir = process.cwd();
+  const options = parseArgs(argv, rootDir);
 
   if (options.help) {
     printHelp();
@@ -107,7 +240,6 @@ export async function cli(
     return;
   }
 
-  const rootDir = process.cwd();
   const totalSteps = 7;
 
   logBanner();
@@ -130,6 +262,9 @@ export async function cli(
     process.exit(1);
   }
   logSuccess(`Node.js environment check passed: v${nodeVersion}`);
+  if (options.configPath) {
+    logInfo(`Loaded configuration file: ${bold(cyan(options.configPath))}`);
+  }
 
   let gitInfo: GitEnvironmentInfo;
   try {
@@ -195,17 +330,8 @@ export async function cli(
   const engineName = purple(engine.toUpperCase());
   logInfo(`Selected release engine: ${bold(engineName)}`);
 
-  if (engine === 'release-it') {
-    logInfo('Delegating release workflow to release-it...');
-    try {
-      runReleaseIt(rootDir, options);
-      logSuccess('Release workflow handled by release-it finished.');
-      return;
-    } catch (error: unknown) {
-      const err = error as Error;
-      logError(`release-it failed: ${err.message}`);
-      process.exit(1);
-    }
+  if (didRunDelegatedEngine(engine, rootDir, options)) {
+    return;
   }
 
   // --------------------------------------------------------------------------
@@ -213,7 +339,7 @@ export async function cli(
   // --------------------------------------------------------------------------
   logStep(4, totalSteps, 'Version Resolution & Registry Inspection', '📦');
 
-  const detectedHistory = detectBumpFromCommits(rootDir);
+  const detectedHistory = detectBumpFromCommits(rootDir, options);
   const historyLabel = detectedHistory.isConventionalHistory
     ? 'Conventional Commits history'
     : 'Non-conventional git history';
@@ -256,33 +382,13 @@ export async function cli(
     }
   }
 
-  let versionBumps: VersionBump[] = [];
-  let updatedVersionsMap: Map<string, string>;
-
-  if (engine === 'changeset') {
-    runChangesetVersion(rootDir, publishablePackages, options);
-    const reloaded = findPackages(rootDir).filter((p) => p.isPublishable);
-    updatedVersionsMap = new Map(reloaded.map((p) => [p.name, p.version]));
-
-    for (const pkg of publishablePackages) {
-      const nextVer = updatedVersionsMap.get(pkg.name) || pkg.version;
-      versionBumps.push({
-        name: pkg.name,
-        oldVersion: pkg.version,
-        newVersion: nextVer,
-        bumped: pkg.version !== nextVer,
-      });
-    }
-  } else {
-    versionBumps = bumpPackages(
-      publishablePackages,
-      initialRegistryInfo,
-      options
-    );
-    updatedVersionsMap = new Map(
-      versionBumps.map((b) => [b.name, b.newVersion])
-    );
-  }
+  const { versionBumps, updatedVersionsMap } = executeVersionBumpPhase(
+    engine,
+    rootDir,
+    publishablePackages,
+    initialRegistryInfo,
+    options
+  );
 
   logSuccess('Version calculation complete:');
   for (const bump of versionBumps) {
