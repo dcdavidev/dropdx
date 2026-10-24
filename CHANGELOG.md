@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.2 - 2026-10-24
+
+### 🔧 Maintenance & Chores
+
+- **release:** scope package as @dcdavidev/dropdx (32b63a2)
+
 ## v0.1.1 - 2026-10-24
 
 ### 🔧 Maintenance & Chores
