@@ -24,30 +24,63 @@ export function formatConventionalChangelog(
     return `* ${summary}\n`;
   }
 
+  const hasConventional = commits.some((c) => c.isConventional);
   const breaking = commits.filter((c) => c.isBreaking);
-  const features = commits.filter((c) => !c.isBreaking && c.type === 'feat');
-  const fixes = commits.filter((c) => !c.isBreaking && c.type === 'fix');
-  const perf = commits.filter((c) => !c.isBreaking && c.type === 'perf');
-  const docs = commits.filter((c) => !c.isBreaking && c.type === 'docs');
+
+  // If history does not use Conventional Commits, format a clean list of changes
+  if (!hasConventional) {
+    const regular = commits.filter((c) => !c.isBreaking);
+    const formatPlainList = (list: ConventionalCommit[]): string =>
+      list.map((c) => `* ${c.subject} (${c.hash})`).join('\n');
+
+    if (breaking.length === 0) {
+      return formatPlainList(regular) || `* ${summary}`;
+    }
+
+    const nonConventionalSections: string[] = [
+      `### 💥 Breaking Changes\n\n${formatPlainList(breaking)}`,
+    ];
+    if (regular.length > 0) {
+      nonConventionalSections.push(
+        `### Changes\n\n${formatPlainList(regular)}`
+      );
+    }
+    return nonConventionalSections.join('\n\n');
+  }
+
+  const features = commits.filter(
+    (c) => !c.isBreaking && c.isConventional && c.type === 'feat'
+  );
+  const fixes = commits.filter(
+    (c) => !c.isBreaking && c.isConventional && c.type === 'fix'
+  );
+  const perf = commits.filter(
+    (c) => !c.isBreaking && c.isConventional && c.type === 'perf'
+  );
+  const docs = commits.filter(
+    (c) => !c.isBreaking && c.isConventional && c.type === 'docs'
+  );
   const chores = commits.filter(
     (c) =>
       !c.isBreaking &&
+      c.isConventional &&
       ['chore', 'build', 'ci', 'refactor', 'style'].includes(c.type)
   );
   const others = commits.filter(
     (c) =>
       !c.isBreaking &&
-      ![
-        'feat',
-        'fix',
-        'perf',
-        'docs',
-        'chore',
-        'build',
-        'ci',
-        'refactor',
-        'style',
-      ].includes(c.type)
+      (!c.isConventional ||
+        ![
+          'feat',
+          'fix',
+          'perf',
+          'docs',
+          'chore',
+          'build',
+          'ci',
+          'refactor',
+          'style',
+        ].includes(c.type))
   );
 
   const sections: string[] = [];

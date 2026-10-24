@@ -87,6 +87,7 @@ export interface ConventionalCommit {
   type: string;
   scope?: string;
   isBreaking: boolean;
+  isConventional: boolean;
   subject: string;
   body: string;
   rawSubject: string;
@@ -96,4 +97,5 @@ export interface BumpDetectionResult {
   bump: BumpType;
   reason: string;
   commits: ConventionalCommit[];
+  isConventionalHistory: boolean;
 }

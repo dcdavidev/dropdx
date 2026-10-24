@@ -174,6 +174,23 @@ export function getLatestTag(rootDir: string = process.cwd()): string | null {
 }
 
 /**
+ * Recognized Conventional Commits v1.0.0 commit types.
+ */
+export const CONVENTIONAL_COMMIT_TYPES = new Set([
+  'feat',
+  'fix',
+  'docs',
+  'style',
+  'refactor',
+  'perf',
+  'test',
+  'build',
+  'ci',
+  'chore',
+  'revert',
+]);
+
+/**
  * Parses a commit subject line and body according to Conventional Commits specification.
  *
  * @param hash - Commit short hash.
@@ -186,28 +203,28 @@ export function parseConventionalCommit(
   rawSubject: string,
   body = ''
 ): ConventionalCommit {
-  const match = /^(\w+)(?:\(([^)]+)\))?(!)?:\s*(.+)$/.exec(rawSubject.trim());
-  if (!match) {
-    const isBreaking =
-      /BREAKING[- ]CHANGE:/i.test(body) ||
-      /BREAKING[- ]CHANGE:/i.test(rawSubject);
+  const trimmedSubject = rawSubject.trim();
+  const hasBreakingNotice =
+    /BREAKING[- ]CHANGE:/i.test(body) ||
+    /BREAKING[- ]CHANGE:/i.test(trimmedSubject);
+
+  const match = /^([a-z]+)(?:\(([^)]+)\))?(!)?:\s*(.+)$/.exec(trimmedSubject);
+  if (!match || !CONVENTIONAL_COMMIT_TYPES.has(match[1])) {
     return {
       hash,
       type: 'other',
-      isBreaking,
-      subject: rawSubject.trim(),
+      isBreaking: hasBreakingNotice,
+      isConventional: false,
+      subject: trimmedSubject,
       body,
-      rawSubject: rawSubject.trim(),
+      rawSubject: trimmedSubject,
     };
   }
 
-  const type = match[1].toLowerCase();
+  const type = match[1];
   const scope = match[2] ? match[2].trim() : undefined;
   const isBangBreaking = Boolean(match[3]);
-  const isBreaking =
-    isBangBreaking ||
-    /BREAKING[- ]CHANGE:/i.test(body) ||
-    /BREAKING[- ]CHANGE:/i.test(rawSubject);
+  const isBreaking = isBangBreaking || hasBreakingNotice;
   const subject = match[4].trim();
 
   return {
@@ -215,10 +232,48 @@ export function parseConventionalCommit(
     type,
     scope,
     isBreaking,
+    isConventional: true,
     subject,
     body,
-    rawSubject: rawSubject.trim(),
+    rawSubject: trimmedSubject,
   };
+}
+
+/**
+ * Checks whether a commit message string follows the Conventional Commits format.
+ *
+ * @param message - Commit message to test.
+ * @returns True if message starts with a valid Conventional Commit header.
+ */
+export function isConventionalCommitMessage(message: string): boolean {
+  if (!message || typeof message !== 'string') return false;
+  const firstLine = message.trim().split('\n', 1)[0] || '';
+  return parseConventionalCommit('', firstLine).isConventional;
+}
+
+/**
+ * Formats a release commit message adapted to whether the repository uses Conventional Commits.
+ *
+ * @param tagName - Release tag (e.g. "v1.2.0").
+ * @param isConventionalHistory - Whether the repository uses Conventional Commits.
+ * @param summary - Optional user-supplied summary message.
+ * @returns Formatted git commit message.
+ */
+export function formatReleaseCommitMessage(
+  tagName: string,
+  isConventionalHistory: boolean,
+  summary?: string
+): string {
+  if (summary && summary.trim()) {
+    const cleanSummary = summary.trim();
+    return isConventionalHistory && !isConventionalCommitMessage(cleanSummary)
+      ? `chore(release): ${cleanSummary}`
+      : cleanSummary;
+  }
+
+  return isConventionalHistory
+    ? `chore(release): bump to ${tagName}`
+    : `Release ${tagName}`;
 }
 
 /**
@@ -226,7 +281,7 @@ export function parseConventionalCommit(
  *
  * @param tag - Tag to compare against, or null for full history.
  * @param rootDir - Working directory for the git command.
- * @returns List of parsed Conventional Commits.
+ * @returns List of parsed commits.
  */
 export function getConventionalCommits(
   tag: string | null = null,
@@ -261,23 +316,48 @@ export function getConventionalCommits(
 }
 
 /**
- * Analyzes Git history to automatically determine the recommended SemVer bump level.
+ * Analyzes a list of parsed commits to determine whether the history is conventional
+ * and calculates the appropriate SemVer bump level.
  *
- * @param rootDir - Working directory for git inspection.
- * @returns Detected bump type ('major' | 'minor' | 'patch'), explanation, and commit list.
+ * @param commits - Parsed commits since the previous tag.
+ * @param latestTag - Previous git tag name, if any.
+ * @param isFallbackConventional - Fallback when commits list is empty.
+ * @returns Detected bump type, explanation, commit list, and conventional history flag.
  */
-export function detectBumpFromCommits(
-  rootDir: string = process.cwd()
+export function analyzeCommitsForBump(
+  commits: ConventionalCommit[],
+  latestTag: string | null = null,
+  isFallbackConventional = false
 ): BumpDetectionResult {
-  const latestTag = getLatestTag(rootDir);
-  const commits = getConventionalCommits(latestTag, rootDir);
-
   if (commits.length === 0) {
     return {
       bump: 'patch',
       reason:
         'No new git commits detected since previous tag; defaulting to patch',
       commits: [],
+      isConventionalHistory: isFallbackConventional,
+    };
+  }
+
+  const conventionalCommits = commits.filter((c) => c.isConventional);
+  const isConventionalHistory = conventionalCommits.length > 0;
+
+  if (!isConventionalHistory) {
+    const breakingCommit = commits.find((c) => c.isBreaking);
+    if (breakingCommit) {
+      return {
+        bump: 'major',
+        reason: `Breaking change note in non-conventional commit ${breakingCommit.hash} ("${breakingCommit.rawSubject}")`,
+        commits,
+        isConventionalHistory: false,
+      };
+    }
+
+    return {
+      bump: 'patch',
+      reason: `Non-conventional git history (${commits.length} commit(s) since ${latestTag ?? 'start'}); defaulting to patch`,
+      commits,
+      isConventionalHistory: false,
     };
   }
 
@@ -288,23 +368,48 @@ export function detectBumpFromCommits(
       bump: 'major',
       reason: `Breaking change in ${breakingCommit.hash} ("${breakingCommit.rawSubject}")`,
       commits,
+      isConventionalHistory: true,
     };
   }
 
   // 2. Check for Features (minor)
-  const featureCommit = commits.find((c) => c.type === 'feat');
+  const featureCommit = conventionalCommits.find((c) => c.type === 'feat');
   if (featureCommit) {
     return {
       bump: 'minor',
       reason: `Feature introduced in ${featureCommit.hash} ("${featureCommit.rawSubject}")`,
       commits,
+      isConventionalHistory: true,
     };
   }
 
   // 3. Otherwise patch
   return {
     bump: 'patch',
-    reason: `${commits.length} commit(s) detected since ${latestTag ?? 'start'} (fixes/chores/maintenance)`,
+    reason: `${conventionalCommits.length}/${commits.length} conventional commit(s) since ${latestTag ?? 'start'} (fixes/chores/maintenance)`,
     commits,
+    isConventionalHistory: true,
   };
+}
+
+/**
+ * Analyzes Git history to automatically determine whether commits are conventional
+ * and recommends the appropriate SemVer bump level.
+ *
+ * @param rootDir - Working directory for git inspection.
+ * @returns Detected bump type ('major' | 'minor' | 'patch'), explanation, commit list, and conventional status.
+ */
+export function detectBumpFromCommits(
+  rootDir: string = process.cwd()
+): BumpDetectionResult {
+  const latestTag = getLatestTag(rootDir);
+  const commits = getConventionalCommits(latestTag, rootDir);
+
+  let isFallbackConventional = false;
+  if (latestTag && commits.length === 0) {
+    const recentCommits = getConventionalCommits(null, rootDir).slice(0, 20);
+    isFallbackConventional = recentCommits.some((c) => c.isConventional);
+  }
+
+  return analyzeCommitsForBump(commits, latestTag, isFallbackConventional);
 }

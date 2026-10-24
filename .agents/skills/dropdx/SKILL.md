@@ -100,7 +100,9 @@ When invoked, `dropdx` executes a deterministic 7-step release pipeline:
 3. **`[3/7]` Release Engine Selection**:
    - Auto-detects `@changesets/cli` (`changeset`), `release-it` (`release-it`), or selects the built-in zero-dependency engine (`internal`).
 4. **`[4/7]` Version Resolution & Registry Inspection**:
-   - If no explicit bump flag (`--patch`, `--minor`, `--major`, `--prerelease`, `--bump`) was passed, analyzes Conventional Commits since the latest Git tag (`BREAKING CHANGE` / `!:` -> `major`, `feat` -> `minor`, otherwise `patch`).
+   - Inspects Git history since the latest tag to determine whether the repository uses **Conventional Commits** (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`) or **non-conventional commits**:
+     - **Conventional History**: Auto-detects `major` (`BREAKING CHANGE` / `!:`), `minor` (`feat`), or `patch` (fixes/chores/maintenance), generates categorized emoji sections in `CHANGELOG.md`, and formats release commits as `chore(release): bump to vX.Y.Z` (auto-prefixing custom `--summary` strings if needed).
+     - **Non-Conventional History**: Defaults safely to `patch` (unless an explicit breaking change note is found), writes a clean flat commit list in `CHANGELOG.md`, and formats release commits as `Release vX.Y.Z`.
    - Queries the npm registry for each package's currently published `latest` version and checks maintainer ownership.
    - Calculates the next version ensuring `targetVersion > registryVersion` (and forces a bump if a local git tag `v<version>` already exists or `--force-bump` / explicit bump is set).
    - Updates `package.json` versions, internal workspace dependency ranges (`^`, `~`, exact), and `CHANGELOG.md`.

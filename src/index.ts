@@ -12,9 +12,13 @@ export {
   updateChangelog,
 } from './utils/changelog.js';
 export {
+  analyzeCommitsForBump,
+  CONVENTIONAL_COMMIT_TYPES,
   detectBumpFromCommits,
+  formatReleaseCommitMessage,
   getConventionalCommits,
   getLatestTag,
+  isConventionalCommitMessage,
   parseConventionalCommit,
 } from './utils/git.js';
 export { resolveRegistry } from './utils/npmrc.js';

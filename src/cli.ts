@@ -43,6 +43,7 @@ import {
   commitChanges,
   createTag,
   detectBumpFromCommits,
+  formatReleaseCommitMessage,
   pushGit,
 } from './utils/git.js';
 import { resolveRegistry } from './utils/npmrc.js';
@@ -212,13 +213,21 @@ export async function cli(
   // --------------------------------------------------------------------------
   logStep(4, totalSteps, 'Version Resolution & Registry Inspection', '📦');
 
-  if (!options.isExplicitBump) {
-    const detected = detectBumpFromCommits(rootDir);
-    options.bump = detected.bump;
-    const bumpName = detected.bump.toUpperCase();
+  const detectedHistory = detectBumpFromCommits(rootDir);
+  const historyLabel = detectedHistory.isConventionalHistory
+    ? 'Conventional Commits history'
+    : 'Non-conventional git history';
+
+  if (options.isExplicitBump) {
+    const bumpName = options.bump.toUpperCase();
+    const formattedBump = bold(purple(bumpName));
+    logInfo(`${historyLabel}: using explicit ${formattedBump} bump override`);
+  } else {
+    options.bump = detectedHistory.bump;
+    const bumpName = detectedHistory.bump.toUpperCase();
     const formattedBump = bold(purple(bumpName));
     logInfo(
-      `Conventional Commits analysis: auto-detected ${formattedBump} bump (${dim(detected.reason)})`
+      `${historyLabel}: auto-detected ${formattedBump} bump (${dim(detectedHistory.reason)})`
     );
   }
 
@@ -327,20 +336,21 @@ export async function cli(
 
   const primaryVersion = versionBumps[0]?.newVersion || '0.0.1';
   const gitTagName = `v${primaryVersion}`;
+  const commitMsg = formatReleaseCommitMessage(
+    gitTagName,
+    detectedHistory.isConventionalHistory,
+    options.summary
+  );
 
   if (options.skipGit) {
     logWarn('Skipping git commit, tag, and push (--skip-git specified)');
   } else if (!gitInfo.remoteUrl) {
     logWarn('No remote origin configured; skipping git push');
   } else if (options.dryRun) {
-    logInfo(
-      `[DRY-RUN] Would commit: ${bold(`chore(release): bump to ${gitTagName}`)}`
-    );
+    logInfo(`[DRY-RUN] Would commit: ${bold(commitMsg)}`);
     logInfo(`[DRY-RUN] Would create tag: ${bold(gitTagName)}`);
     logInfo(`[DRY-RUN] Would push to origin/${gitInfo.currentBranch} and tags`);
   } else {
-    const commitMsg =
-      options.summary || `chore(release): bump to ${gitTagName}`;
     logInfo(`Creating git commit: "${commitMsg}"...`);
     commitChanges(commitMsg, options, rootDir);
     logSuccess('Git commit created');
