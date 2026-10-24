@@ -1,6 +1,6 @@
 # 🤖 dropdx Agent Skills
 
-Official AI agent skills for **`dropdx`** conforming to the open [Agent Skills specification](https://github.com/vercel-labs/skills).
+Official AI agent skills for **`@dcdavidev/dropdx`** (`dropdx`) conforming to the open [Agent Skills specification](https://github.com/vercel-labs/skills).
 
 These skills provide AI coding assistants (including **Google Antigravity**, **Cursor**, **Claude Code**, **GitHub Copilot**, **Cline**, **Windsurf**, **Zed**, and **Warp**) with contextual knowledge and deterministic workflows to configure, dry-run, troubleshoot, and execute automated package releases across single packages and monorepos.
 

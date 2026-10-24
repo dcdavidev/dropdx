@@ -1,6 +1,6 @@
 # dropdx 🧙‍♂️🚀
 
-[![npm version](https://img.shields.io/npm/v/dropdx?color=a855f7&style=flat-square)](https://www.npmjs.com/package/dropdx)
+[![npm version](https://img.shields.io/npm/v/@dcdavidev/dropdx?color=a855f7&style=flat-square)](https://www.npmjs.com/package/@dcdavidev/dropdx)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square)](LICENSE)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-9333ea.svg?style=flat-square)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-c084fc.svg?style=flat-square)](https://www.typescriptlang.org/)
@@ -65,26 +65,26 @@ You can run `dropdx` on-demand using your preferred package runner, or install i
 
 ```bash
 # Using pnpm
-pnpm dlx dropdx
+pnpm dlx @dcdavidev/dropdx
 
 # Using npm
-npx dropdx
+npx @dcdavidev/dropdx
 
 # Using yarn
-yarn dlx dropdx
+yarn dlx @dcdavidev/dropdx
 ```
 
 ### Local Project Installation
 
 ```bash
 # Using pnpm
-pnpm add -D dropdx
+pnpm add -D @dcdavidev/dropdx
 
 # Using npm
-npm install --save-dev dropdx
+npm install --save-dev @dcdavidev/dropdx
 
 # Using yarn
-yarn add -D dropdx
+yarn add -D @dcdavidev/dropdx
 ```
 
 ---
@@ -345,7 +345,7 @@ import {
   findPackages,
   resolveRegistry,
   resolveTargetVersion,
-} from 'dropdx';
+} from '@dcdavidev/dropdx';
 
 // Run the full CLI programmatically
 await cli(['--dry-run', '--bump', 'minor']);

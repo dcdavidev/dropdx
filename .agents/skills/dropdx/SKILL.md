@@ -1,11 +1,11 @@
 ---
 name: dropdx
-description: Guides automated package releasing, SemVer version bumping, Conventional Commits changelog generation, .npmrc registry resolution, and npm publishing for single packages and monorepos using the dropdx CLI and programmatic TypeScript API.
+description: Guides automated package releasing, SemVer version bumping, Conventional Commits changelog generation, .npmrc registry resolution, and npm publishing for single packages and monorepos using the @dcdavidev/dropdx CLI and programmatic TypeScript API.
 ---
 
 # dropdx Skill
 
-This skill guides an AI agent through configuring, testing (dry-running), troubleshooting, and executing automated package releases and publications for standalone packages and monorepos using **`dropdx`**.
+This skill guides an AI agent through configuring, testing (dry-running), troubleshooting, and executing automated package releases and publications for standalone packages and monorepos using **`@dcdavidev/dropdx`** (`dropdx`).
 
 ---
 
@@ -30,13 +30,13 @@ Activate this skill when:
 
 ```bash
 # Install locally in a project (recommended)
-pnpm add -D dropdx
+pnpm add -D @dcdavidev/dropdx
 # or
-npm install --save-dev dropdx
+npm install --save-dev @dcdavidev/dropdx
 
 # Ad-hoc execution without installing
-pnpm dlx dropdx [options]
-npx dropdx [options]
+pnpm dlx @dcdavidev/dropdx [options]
+npx @dcdavidev/dropdx [options]
 ```
 
 ### Common Command Runbooks
@@ -153,7 +153,7 @@ For every package, `resolveRegistry(pkgName, options, rootDir)` resolves the tar
 
 ## 5. Programmatic TypeScript API
 
-`dropdx` exports its CLI runner, utilities, and TypeScript interfaces for custom release scripts.
+`@dcdavidev/dropdx` exports its CLI runner, utilities, and TypeScript interfaces for custom release scripts.
 
 ```typescript
 import {
@@ -177,7 +177,7 @@ import {
   resolveTargetVersion,
   sortPackagesTopologically,
   updateChangelog,
-} from 'dropdx';
+} from '@dcdavidev/dropdx';
 
 // 1. Run the CLI pipeline programmatically
 await cli(['--dry-run', '--minor']);
