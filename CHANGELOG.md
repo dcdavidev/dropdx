@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.3.0 - 2026-10-24
+
+### ✨ Features
+
+- support npm staged publishing when 2FA is required (4afe934)
+
 ## v0.2.1 - 2026-10-24
 
 ### 🔧 Maintenance & Chores

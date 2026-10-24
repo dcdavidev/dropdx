@@ -1,6 +1,6 @@
 {
   "name": "@dcdavidev/dropdx",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Automated release and publish CLI for single packages and monorepos",
   "keywords": [
     "release",
