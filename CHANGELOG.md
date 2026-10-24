@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.0 - 2026-10-24
+
+### ✨ Features
+
+- **workspace:** add multi-format configs and more release engines (b9e5bea)
+- **release:** detect conventional vs non-conventional git history (1c2379c)
+
 ## v0.1.2 - 2026-10-24
 
 ### 🔧 Maintenance & Chores
