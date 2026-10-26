@@ -1,4 +1,6 @@
 # dropdx YAML configuration example (.config/dropdx.config.yaml)
+# version: dropdx version that generated this file (run "dropdx init --force" to refresh)
+version: 0.3.0
 conventionalCommits: true
 engine: auto
 # registry: https://registry.npmjs.org/

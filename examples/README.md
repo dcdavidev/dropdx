@@ -9,6 +9,37 @@
 
 You can also pass a custom path explicitly via `--config <path>` (or `-c <path>`).
 
+## Generating a Configuration File
+
+Instead of writing the file by hand, scaffold it with the `init` command:
+
+```bash
+# Generate .config/dropdx.config.json stamped with the current dropdx version
+dropdx init
+
+# Overwrite an existing configuration file
+dropdx init --force
+
+# Write to a custom path
+dropdx init --config custom/dropdx.config.json
+```
+
+Every generated file includes a `version` property matching the version of `dropdx` that created it:
+
+```json
+{
+  "version": "0.3.0",
+  "conventionalCommits": true,
+  "engine": "auto",
+  "skipBuild": false,
+  "skipGit": false,
+  "skipPublish": false,
+  "allowDirty": false
+}
+```
+
+If a loaded configuration file declares a `version` that does not match the running `dropdx` version, `dropdx` prints a warning so you know you are using a config file generated for a different version.
+
 ## Important Notes
 
 - **Version Bumping (`bump`)**: SemVer bump calculation (`patch`, `minor`, `major`, `prerelease`) is **automatic** by default based on Git commit history since the latest tag, or overridden per release via CLI flags (`--patch`, `--minor`, `--major`, `--prerelease`, `--bump <type>`). It is intentionally not stored in static configuration files.

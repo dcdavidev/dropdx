@@ -17,6 +17,7 @@ export {
   publishPackages,
 } from './engines/dropdx-engine.js';
 export { detectEngine, SUPPORTED_ENGINES } from './engines/index.js';
+export { buildInitConfig, runInit, serializeConfig } from './init.js';
 export * from './types.js';
 export {
   formatConventionalChangelog,
@@ -58,3 +59,4 @@ export {
   parseSemVer,
   resolveTargetVersion,
 } from './utils/semver.js';
+export { getConfigVersionWarning, getDropdxVersion } from './utils/version.js';

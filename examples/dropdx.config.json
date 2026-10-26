@@ -1,4 +1,5 @@
 {
+  "version": "0.3.0",
   "conventionalCommits": true,
   "engine": "auto",
   "skipBuild": false,

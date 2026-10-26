@@ -3,10 +3,7 @@
  * CLI orchestrator for dropdx automated release pipeline.
  */
 
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
 import process from 'node:process';
-import { fileURLToPath } from 'node:url';
 
 import { parseArgs } from './config.js';
 import { runBumppVersion } from './engines/bumpp.js';
@@ -22,6 +19,7 @@ import { runNp } from './engines/np.js';
 import { runReleaseIt } from './engines/release-it.js';
 import { runSemanticRelease } from './engines/semantic-release.js';
 import { runStandardVersion } from './engines/standard-version.js';
+import { runInit } from './init.js';
 import type {
   CliOptions,
   EngineType,
@@ -58,24 +56,7 @@ import { resolveRegistry } from './utils/npmrc.js';
 import { findPackages, sortPackagesTopologically } from './utils/packages.js';
 import { checkNpmWhoami, fetchNpmRegistryInfo } from './utils/registry.js';
 import { isSemVerGreaterThan } from './utils/semver.js';
-
-/**
- * Returns package.json version of dropdx itself.
- *
- * @returns Version string.
- */
-function getDropdxVersion(): string {
-  try {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const pkgPath = path.join(__dirname, '..', 'package.json');
-    const json = JSON.parse(readFileSync(pkgPath, 'utf8')) as {
-      version?: string;
-    };
-    return json.version || '0.0.1';
-  } catch {
-    return '0.0.1';
-  }
-}
+import { getConfigVersionWarning, getDropdxVersion } from './utils/version.js';
 
 /**
  * Verifies whether the authenticated user has maintainer access.
@@ -240,9 +221,23 @@ export async function cli(
     return;
   }
 
+  if (options.init) {
+    runInit(options, rootDir);
+    return;
+  }
+
+  const configVersionWarning = getConfigVersionWarning(
+    options.configVersion,
+    getDropdxVersion()
+  );
+
   const totalSteps = 7;
 
   logBanner();
+
+  if (configVersionWarning) {
+    logWarn(configVersionWarning);
+  }
 
   if (options.dryRun) {
     console.log(

@@ -59,6 +59,9 @@ export const DEFAULT_OPTIONS: CliOptions = {
   provenance: Boolean(process.env.GITHUB_ACTIONS),
   isForceBump: false,
   configPath: undefined,
+  configVersion: undefined,
+  init: false,
+  force: false,
 };
 
 /**
@@ -117,6 +120,9 @@ function applyConfigToOptions(
 ): void {
   if (configPath) {
     options.configPath = configPath;
+  }
+  if (config.version !== undefined) {
+    options.configVersion = config.version;
   }
   if (config.conventionalCommits !== undefined) {
     options.conventionalCommits = Boolean(config.conventionalCommits);
@@ -202,6 +208,15 @@ function handleArg(options: CliOptions, argv: string[], index: number): number {
     case '--config': {
       options.configPath = argv[index + 1] || DEFAULT_CONFIG_PATH;
       return index + 2;
+    }
+    case 'init': {
+      options.init = true;
+      return index + 1;
+    }
+    case '-f':
+    case '--force': {
+      options.force = true;
+      return index + 1;
     }
     case '-d':
     case '--dry-run': {
@@ -325,6 +340,12 @@ export function parseArgs(
   let i = 0;
   while (i < argv.length) {
     i = handleArg(options, argv, i);
+  }
+
+  if (options.init) {
+    // `init` targets the default path unless an explicit --config was passed,
+    // so an unrelated discovered config file is never reported as existing.
+    options.configPath = customConfigPath;
   }
 
   return options;
