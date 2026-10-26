@@ -20,6 +20,7 @@ export type AccessType = 'public' | 'restricted';
 
 export interface DropdxConfig {
   $schema?: string;
+  version?: string;
   conventionalCommits?: boolean;
   registry?: string;
   engine?: EngineType;
@@ -53,8 +54,11 @@ export interface CliOptions {
   provenance: boolean;
   isForceBump: boolean;
   configPath?: string;
+  configVersion?: string;
   help?: boolean;
   version?: boolean;
+  init?: boolean;
+  force?: boolean;
 }
 
 export interface SemVer {

@@ -1,4 +1,7 @@
 {
+  // dropdx version that generated this configuration file (run "dropdx init --force" to refresh)
+  "version": "0.3.0",
+
   // Enable Conventional Commits changelog categorization and release commit formatting
   "conventionalCommits": true,
 

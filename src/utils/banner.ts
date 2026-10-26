@@ -111,6 +111,10 @@ ${purple(bold('Uso:'))}
   ${cyan('pnpm exec dropdx')} [opzioni]
   ${cyan('dropdx')} [opzioni]
 
+${purple(bold('Comandi:'))}
+  ${cyan('init')}                          Genera .config/dropdx.config.json con la versione corrente di dropdx
+  ${cyan('init --force')}                  Sovrascrive un file di configurazione esistente
+
 ${purple(bold('Opzioni Version Bump:'))}
   ${cyan('--bump <patch|minor|major>')}   Livello di incremento versione (default: patch)
   ${cyan('--patch')}                       Scorciatoia per --bump patch
@@ -134,6 +138,7 @@ ${purple(bold('Opzioni Engine & Workflow:'))}
   ${cyan('--skip-git')}                    Salta commit, tag e push su git
   ${cyan('--skip-publish')}                Salta la pubblicazione sul registry npm
   ${cyan('--allow-dirty')}                 Permette l'esecuzione anche con modifiche non committate nel git repo
+  ${cyan('-f, --force')}                   Forza la sovrascrittura del file di configurazione (con "init")
 
 ${purple(bold('Informazioni Generali:'))}
   ${cyan('-h, --help')}                    Mostra questo messaggio di aiuto

@@ -16,6 +16,7 @@
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [CLI Command-Line Reference](#cli-command-line-reference)
+- [Configuration File](#configuration-file)
 - [The 7-Step Release Pipeline](#the-7-step-release-pipeline)
 - [Registry Resolution (`.npmrc`)](#registry-resolution-npmrc)
 - [Engine Auto-Detection](#engine-auto-detection)
@@ -91,7 +92,31 @@ yarn add -D @dcdavidev/dropdx
 
 ## Quick Start
 
-### 1. Add Release Script to `package.json`
+### 1. Scaffold a Configuration File (optional)
+
+`dropdx` works with zero configuration, but you can generate a `.config/dropdx.config.json` file to customize the release workflow:
+
+```bash
+dropdx init
+```
+
+This writes a configuration file stamped with the version of `dropdx` that generated it:
+
+```json
+{
+  "version": "0.3.0",
+  "conventionalCommits": true,
+  "engine": "auto",
+  "skipBuild": false,
+  "skipGit": false,
+  "skipPublish": false,
+  "allowDirty": false
+}
+```
+
+If the file already exists, `dropdx init` leaves it untouched. Pass `--force` to overwrite it. If a loaded config file declares a `version` that does not match the running `dropdx` version, `dropdx` prints a warning so you know you are using a configuration file generated for a different version.
+
+### 2. Add Release Script to `package.json`
 
 ```json
 {
@@ -104,7 +129,7 @@ yarn add -D @dcdavidev/dropdx
 }
 ```
 
-### 2. Run a Dry Run
+### 3. Run a Dry Run
 
 Before making any real changes or publishing, test your setup with `--dry-run`:
 
@@ -112,7 +137,7 @@ Before making any real changes or publishing, test your setup with `--dry-run`:
 pnpm run release:dry
 ```
 
-### 3. Publish Your Release
+### 4. Publish Your Release
 
 When you are ready to publish:
 
@@ -135,30 +160,62 @@ Usage:
 
 ### Options Table
 
-| Option             | Shorthand | Description                                                     | Default                        |
-| :----------------- | :-------- | :-------------------------------------------------------------- | :----------------------------- |
-| `--bump <type>`    |           | SemVer increment level: `patch`, `minor`, `major`, `prerelease` | `patch`                        |
-| `--patch`          |           | Shortcut for `--bump patch`                                     |                                |
-| `--minor`          |           | Shortcut for `--bump minor`                                     |                                |
-| `--major`          |           | Shortcut for `--bump major`                                     |                                |
-| `--prerelease`     |           | Shortcut for `--bump prerelease`                                |                                |
-| `--force-bump`     |           | Force version bump even when local version > registry version   | `false`                        |
-| `--summary <text>` | `-m`      | Release summary note (used in commit message & changelog)       | Auto-generated                 |
-| `--registry <url>` |           | Target npm registry URL                                         | From `.npmrc` or npmjs.org     |
-| `--tag <name>`     |           | npm dist-tag (e.g., `latest`, `beta`, `next`)                   | `latest`                       |
-| `--access <level>` |           | Package access level: `public` or `restricted`                  | `public`                       |
-| `--otp <code>`     |           | Two-factor authentication (2FA) one-time password               |                                |
-| `--stage`          |           | Stage package release (`npm stage publish`) for 2FA approval    | `false` (auto-fallback on 2FA) |
-| `--provenance`     |           | Generate npm provenance attestation (useful in CI)              | `false`                        |
-| `--config <path>`  | `-c`      | Path to configuration file                                      | `.config/dropdx.config.json`   |
-| `--engine <name>`  |           | Release engine: `auto`, `changeset`, `release-it`, `internal`   | `auto`                         |
-| `--dry-run`        | `-d`      | Simulate validations, bumps, build, and publish without changes | `false`                        |
-| `--skip-build`     |           | Skip running package build scripts                              | `false`                        |
-| `--skip-git`       |           | Skip git commit, tag, and push steps                            | `false`                        |
-| `--skip-publish`   |           | Skip publishing packages to the registry                        | `false`                        |
-| `--allow-dirty`    |           | Allow release even with uncommitted changes in git repository   | `false`                        |
-| `--help`           | `-h`      | Display help screen                                             |                                |
-| `--version`        | `-v`      | Display `dropdx` version                                        |                                |
+| Option             | Shorthand | Description                                                          | Default                        |
+| :----------------- | :-------- | :------------------------------------------------------------------- | :----------------------------- |
+| `--bump <type>`    |           | SemVer increment level: `patch`, `minor`, `major`, `prerelease`      | `patch`                        |
+| `--patch`          |           | Shortcut for `--bump patch`                                          |                                |
+| `--minor`          |           | Shortcut for `--bump minor`                                          |                                |
+| `--major`          |           | Shortcut for `--bump major`                                          |                                |
+| `--prerelease`     |           | Shortcut for `--bump prerelease`                                     |                                |
+| `--force-bump`     |           | Force version bump even when local version > registry version        | `false`                        |
+| `--summary <text>` | `-m`      | Release summary note (used in commit message & changelog)            | Auto-generated                 |
+| `--registry <url>` |           | Target npm registry URL                                              | From `.npmrc` or npmjs.org     |
+| `--tag <name>`     |           | npm dist-tag (e.g., `latest`, `beta`, `next`)                        | `latest`                       |
+| `--access <level>` |           | Package access level: `public` or `restricted`                       | `public`                       |
+| `--otp <code>`     |           | Two-factor authentication (2FA) one-time password                    |                                |
+| `--stage`          |           | Stage package release (`npm stage publish`) for 2FA approval         | `false` (auto-fallback on 2FA) |
+| `--provenance`     |           | Generate npm provenance attestation (useful in CI)                   | `false`                        |
+| `--config <path>`  | `-c`      | Path to configuration file                                           | `.config/dropdx.config.json`   |
+| `--engine <name>`  |           | Release engine: `auto`, `changeset`, `release-it`, `internal`        | `auto`                         |
+| `init`             |           | Generate a `.config/dropdx.config.json` file for the current version |                                |
+| `--force`          | `-f`      | Overwrite an existing configuration file (with `init`)               | `false`                        |
+| `--dry-run`        | `-d`      | Simulate validations, bumps, build, and publish without changes      | `false`                        |
+| `--skip-build`     |           | Skip running package build scripts                                   | `false`                        |
+| `--skip-git`       |           | Skip git commit, tag, and push steps                                 | `false`                        |
+| `--skip-publish`   |           | Skip publishing packages to the registry                             | `false`                        |
+| `--allow-dirty`    |           | Allow release even with uncommitted changes in git repository        | `false`                        |
+| `--help`           | `-h`      | Display help screen                                                  |                                |
+| `--version`        | `-v`      | Display `dropdx` version                                             |                                |
+
+---
+
+## Configuration File
+
+Generate a `.config/dropdx.config.json` file with the `init` command:
+
+```bash
+dropdx init
+```
+
+The generated file is stamped with the `version` of `dropdx` that created it, so `dropdx` can detect when a configuration file was written for a different release:
+
+```json
+{
+  "version": "0.3.0",
+  "conventionalCommits": true,
+  "engine": "auto",
+  "skipBuild": false,
+  "skipGit": false,
+  "skipPublish": false,
+  "allowDirty": false
+}
+```
+
+- `dropdx init` never overwrites an existing configuration file. Pass `--force` (`-f`) to regenerate it.
+- Use `--config <path>` (`-c`) to write to a custom location.
+- When a loaded configuration file declares a `version` that does not match the running `dropdx` version, `dropdx` prints a warning before the release pipeline starts, so you know you are using a config file generated for a different version.
+
+`dropdx` also discovers configuration files in `.config/` or the project root across JSON, JSONC, YAML, and TOML formats (see [Configuration Examples](./examples/README.md)).
 
 ---
 
@@ -352,12 +409,18 @@ import {
   detectEngine,
   fetchNpmRegistryInfo,
   findPackages,
+  getDropdxVersion,
   resolveRegistry,
   resolveTargetVersion,
+  runInit,
 } from '@dcdavidev/dropdx';
 
 // Run the full CLI programmatically
 await cli(['--dry-run', '--bump', 'minor']);
+
+// Scaffold a .config/dropdx.config.json stamped with the current CLI version
+runInit({ force: true });
+console.log(`Config generated by dropdx v${getDropdxVersion()}`);
 
 // Inspect registry version for a package
 const registry = resolveRegistry('@my-org/my-pkg');
@@ -375,6 +438,7 @@ console.log(`Target version to publish: ${target}`);
 All TypeScript definitions are exported directly from `dropdx`:
 
 - `CliOptions`
+- `DropdxConfig`
 - `WorkspacePackage`
 - `NpmRegistryInfo`
 - `VersionBump`
