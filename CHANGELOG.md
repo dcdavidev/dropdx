@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.4.0 - 2026-10-26
+
+### ✨ Features
+
+- **@dcdavidev/dropdx:** add init command and config version warning (f79bd72)
+
+### Other Changes
+
+- Merge pull request #1 from dcdavidev/feat/init-command (53a0a71)
+
 ## v0.3.0 - 2026-10-24
 
 ### ✨ Features
