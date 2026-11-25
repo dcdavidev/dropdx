@@ -17,7 +17,7 @@ import process from 'node:process';
 
 import { describe, expect, it } from 'vitest';
 
-import { parseArgs } from '../src/config.js';
+import { loadConfigFile, parseArgs } from '../src/config.js';
 import { buildInitConfig, runInit, serializeConfig } from '../src/init.js';
 import {
   getConfigVersionWarning,
@@ -134,9 +134,8 @@ describe('dropdx init command and config version compatibility', () => {
     expect(warning?.includes('dropdx init --force')).toBeTruthy();
   });
 
-  it('stamps the repository config file with the current CLI version', () => {
-    const configPath = path.join(process.cwd(), '.config/dropdx.json');
-    const repoConfig = JSON.parse(readFileSync(configPath, 'utf8'));
-    expect(repoConfig.version).toBe(getDropdxVersion());
+  it('loads the repository YAML config with the current CLI version', () => {
+    const { config } = loadConfigFile(process.cwd(), '.config/dropdx.yml');
+    expect(config.version).toBe(getDropdxVersion());
   });
 });

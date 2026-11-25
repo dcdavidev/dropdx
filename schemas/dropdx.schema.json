@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/dcdavidev/dropdx/main/schemas/dropdx.schema.json",
+  "title": "dropdx configuration",
+  "description": "Configuration options accepted by dropdx.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI of the JSON Schema used to validate this configuration."
+    },
+    "version": {
+      "type": "string",
+      "description": "dropdx version that generated this configuration file."
+    },
+    "conventionalCommits": {
+      "type": "boolean",
+      "description": "Enable Conventional Commits changelog categorization and release commit formatting."
+    },
+    "registry": {
+      "type": "string",
+      "format": "uri",
+      "description": "Registry URL to use for package publication."
+    },
+    "engine": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "changeset",
+        "release-it",
+        "semantic-release",
+        "lerna",
+        "bumpp",
+        "standard-version",
+        "np",
+        "internal"
+      ],
+      "description": "Release engine to use."
+    },
+    "dryRun": {
+      "type": "boolean",
+      "description": "Simulate the release without performing side effects."
+    },
+    "skipBuild": {
+      "type": "boolean",
+      "description": "Skip package build scripts."
+    },
+    "skipGit": {
+      "type": "boolean",
+      "description": "Skip git commit, tag, and push steps."
+    },
+    "skipPublish": {
+      "type": "boolean",
+      "description": "Skip publishing packages to the registry."
+    },
+    "allowDirty": {
+      "type": "boolean",
+      "description": "Allow running with uncommitted changes in the git working tree."
+    },
+    "provenance": {
+      "type": "boolean",
+      "description": "Generate npm provenance attestations when publishing."
+    },
+    "stage": {
+      "type": "boolean",
+      "description": "Stage package publication for later approval."
+    },
+    "forceBump": {
+      "type": "boolean",
+      "description": "Force a version bump even when the local package version is greater than the registry version."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Release summary used in the release commit and changelog."
+    }
+  },
+  "additionalProperties": false
+}

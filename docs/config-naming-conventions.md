@@ -1,4 +1,4 @@
-# `dropdx` Configuration Examples
+# `dropdx` Configuration Naming Conventions
 
 `dropdx` uses cosmiconfig to search for configuration from the workspace root. It checks these paths in order:
 
@@ -11,14 +11,48 @@
 7. `dropdx.config.yml`
 8. `dropdx.config.toml`
 
-The `.config/dropdx.*` paths are recommended and take precedence over root-level `dropdx.config.*` files. The examples below use root-level names:
-
-- [`dropdx.config.json`](./dropdx.config.json)
-- [`dropdx.config.jsonc`](./dropdx.config.jsonc)
-- [`dropdx.config.yml`](./dropdx.config.yml)
-- [`dropdx.config.toml`](./dropdx.config.toml)
+The `.config/dropdx.*` paths are recommended and take precedence over root-level `dropdx.config.*` files. Both naming conventions support the same settings. See [Supported Configuration Formats](../README.md#supported-configuration-formats) for complete examples.
 
 Use `--config <path>` (or `-c <path>`) to load a configuration from a custom location.
+
+## Schema and Editor Support
+
+The dropdx configuration uses JSON Schema Draft 2020-12. The schema is available as [JSON](../schemas/dropdx.schema.json) and [YAML](../schemas/dropdx.schema.yml) documents; both describe the same supported properties. Set the `$schema` property to the JSON schema URI for editor validation and completion:
+
+```text
+https://raw.githubusercontent.com/dcdavidev/dropdx/main/schemas/dropdx.schema.json
+```
+
+### JSON and JSONC
+
+Add `$schema` as a top-level property. It is schema metadata and is ignored by dropdx:
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/dcdavidev/dropdx/main/schemas/dropdx.schema.json",
+  "engine": "auto"
+}
+```
+
+### YAML
+
+For editors using yaml-language-server, add a schema directive comment at the top of the file:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/dcdavidev/dropdx/main/schemas/dropdx.schema.json
+engine: auto
+```
+
+### TOML
+
+There is no separate TOML schema format. TOML editors that support JSON Schema can use the same schema; see the [TOML schema association documentation](https://taplo.tamasfe.dev/configuration/using-schemas.html). In the editor described there, associate the schema with a TOML file by adding this top-level key (quoted because TOML bare keys cannot start with `$`):
+
+```toml
+'$schema' = 'https://raw.githubusercontent.com/dcdavidev/dropdx/main/schemas/dropdx.schema.json'
+engine = 'auto'
+```
+
+These associations enable editor completion and diagnostics. They do not add runtime schema validation to the dropdx CLI.
 
 ## Generating a Configuration File
 

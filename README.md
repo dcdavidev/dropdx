@@ -230,9 +230,9 @@ The `.config/dropdx.*` names are the recommended convention and take precedence 
 
 ### Supported Configuration Formats
 
-The following examples show the same workflow settings in each supported format. Use the `.config/dropdx.*` path shown in the heading, or put the corresponding `dropdx.config.*` file in the workspace root. The full example files are in [`examples/`](./examples/README.md).
+The following examples show the same workflow settings in each supported format. Use the `.config/dropdx.*` path shown in the heading, or put the corresponding `dropdx.config.*` file in the workspace root. See [configuration naming conventions and full examples](./docs/config-naming-conventions.md).
 
-#### JSON — `.config/dropdx.json` or `dropdx.config.json` ([example](./examples/dropdx.config.json))
+#### JSON — `.config/dropdx.json` or `dropdx.config.json`
 
 ```json
 {
@@ -246,7 +246,7 @@ The following examples show the same workflow settings in each supported format.
 }
 ```
 
-#### JSONC — `.config/dropdx.jsonc` or `dropdx.config.jsonc` ([example](./examples/dropdx.config.jsonc))
+#### JSONC — `.config/dropdx.jsonc` or `dropdx.config.jsonc`
 
 ```jsonc
 {
@@ -270,7 +270,7 @@ The following examples show the same workflow settings in each supported format.
 }
 ```
 
-#### YAML — `.config/dropdx.yml` or `dropdx.config.yml` ([example](./examples/dropdx.config.yml))
+#### YAML — `.config/dropdx.yml` or `dropdx.config.yml`
 
 ```yml
 # dropdx YAML configuration example (dropdx.config.yml)
@@ -285,7 +285,7 @@ skipPublish: false
 allowDirty: false
 ```
 
-#### TOML — `.config/dropdx.toml` or `dropdx.config.toml` ([example](./examples/dropdx.config.toml))
+#### TOML — `.config/dropdx.toml` or `dropdx.config.toml`
 
 ```toml
 # dropdx TOML configuration example (dropdx.config.toml)

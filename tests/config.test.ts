@@ -10,11 +10,7 @@ import process from 'node:process';
 
 import { describe, expect, it } from 'vitest';
 
-import {
-  DEFAULT_CONFIG_PATH,
-  loadConfigFile,
-  parseArgs,
-} from '../src/config.js';
+import { loadConfigFile, parseArgs } from '../src/config.js';
 import {
   parseJsoncConfig,
   parseTomlConfig,
@@ -22,9 +18,9 @@ import {
 } from '../src/utils/config-parser.js';
 
 describe('cosmiconfig loader, multi-format parsers, and precedence', () => {
-  it('loads default .config/dropdx.json from the repository root', () => {
+  it('loads the repository .config/dropdx.yml configuration', () => {
     const { config, configPath } = loadConfigFile(process.cwd());
-    expect(configPath).toBe(DEFAULT_CONFIG_PATH);
+    expect(configPath).toBe('.config/dropdx.yml');
     expect(config.conventionalCommits).toBe(true);
     expect(config.engine).toBe('auto');
   });
@@ -252,26 +248,6 @@ allowDirty = true
       expect(options.allowDirty).toBe(true);
     } finally {
       rmSync(tmpDir, { recursive: true, force: true });
-    }
-  });
-
-  it('loads all example configuration files from examples/', () => {
-    const exampleFiles = [
-      'examples/dropdx.config.json',
-      'examples/dropdx.config.jsonc',
-      'examples/dropdx.config.yml',
-      'examples/dropdx.config.toml',
-    ];
-
-    for (const file of exampleFiles) {
-      const { config, configPath } = loadConfigFile(process.cwd(), file);
-      expect(configPath).toBe(file);
-      expect(config.conventionalCommits).toBe(true);
-      expect(config.engine).toBe('auto');
-      expect(config.skipBuild).toBe(false);
-      expect(config.skipGit).toBe(false);
-      expect(config.skipPublish).toBe(false);
-      expect(config.allowDirty).toBe(false);
     }
   });
 });

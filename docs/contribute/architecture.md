@@ -22,7 +22,7 @@ dropdx is a single-package TypeScript and ECMAScript Module (`"type": "module"`)
 │   ├── cspell/
 │   │   └── custom.txt       # Project-specific CSpell word list
 │   ├── cspell.yml           # CSpell configuration
-│   ├── dropdx.json          # dropdx configuration used to release dropdx itself
+│   ├── dropdx.yml           # dropdx configuration used to release dropdx itself
 │   └── lefthook.yml         # Lefthook Git hook definitions
 ├── .github/
 │   ├── dependabot.yml       # Weekly dependency and GitHub Actions updates
@@ -36,7 +36,6 @@ dropdx is a single-package TypeScript and ECMAScript Module (`"type": "module"`)
 │   ├── CONTRIBUTING.md      # Main contributing guide
 │   ├── SECURITY.md          # Security policy and vulnerability reporting
 │   └── contribute/          # Detailed contributor documentation
-├── examples/                # Sample dropdx config files (JSON, JSONC, YML, TOML)
 ├── scripts/
 │   ├── update-node.ts       # Syncs `.nvmrc` and `@types/node` with Node.js LTS
 │   └── update-turbo.ts      # Upgrades `turbo` and runs `@turbo/codemod`
@@ -102,7 +101,7 @@ In [`package.json`](../../package.json), `bin` and `dist` are listed in `files`.
 - [`src/utils/`](../../src/utils/): shared helpers for git, `.npmrc`, the registry, SemVer, package discovery, changelogs, and process execution.
 - [`src/index.ts`](../../src/index.ts): public programmatic API.
 
-dropdx releases itself: `pnpm release` builds the package and runs `bin/dropdx.js` with the repository config in [`.config/dropdx.json`](../../.config/dropdx.json).
+dropdx releases itself: `pnpm release` builds the package and runs `bin/dropdx.js` with the repository config in [`.config/dropdx.yml`](../../.config/dropdx.yml).
 
 ## Quality Toolchain and Git Hooks
 

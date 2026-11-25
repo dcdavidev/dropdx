@@ -20,3 +20,7 @@ dictionaries:
 # Paths the preset does not already ignore.
 ignorePaths:
   - skills-lock.json
+  - '**/.agents/**'
+  - '**/.changeset/**'
+  - '**/.claude/**'
+  - '**/.openhands/**'
