@@ -321,6 +321,16 @@ When a release is run, dropdx compares the highest published version across npm 
 
 JSR publishing works with the built-in engine and version-only engines such as Changesets, Lerna, Bumpp, and Standard-Version. Full-lifecycle delegated engines (`release-it`, `semantic-release`, and `np`) are not supported in dual-publish mode because they handle npm publishing themselves.
 
+### Install the CLI with Deno
+
+After publishing the package to JSR, install the `dropdx` command globally:
+
+```sh
+deno install --global --allow-all --unstable-sloppy-imports --name dropdx jsr:@dcdavidev/dropdx/cli
+```
+
+The installed command accepts the same options as the npm CLI. For example, run `dropdx --help` to see the available commands. The sloppy-imports flag supports this package's Node-style `.js` specifiers for TypeScript files. The broad permissions are required because releases access the repository, run Git and package-manager commands, and contact registries.
+
 ---
 
 ## The 7-Step Release Pipeline

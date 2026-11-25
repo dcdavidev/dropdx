@@ -135,7 +135,7 @@ export function updateChangelog(
   pkgDir: string,
   newVersion: string,
   summary = 'Release version bump',
-  dateStr = new Date().toISOString().slice(0, 10),
+  dateStr: string = new Date().toISOString().slice(0, 10),
   commits?: ConventionalCommit[],
   isConventionalEnabled?: boolean
 ): string {

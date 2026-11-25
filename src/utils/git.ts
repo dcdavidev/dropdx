@@ -176,7 +176,7 @@ export function getLatestTag(rootDir: string = process.cwd()): string | null {
 /**
  * Recognized Conventional Commits v1.0.0 commit types.
  */
-export const CONVENTIONAL_COMMIT_TYPES = new Set([
+export const CONVENTIONAL_COMMIT_TYPES: Set<string> = new Set([
   'feat',
   'fix',
   'docs',
