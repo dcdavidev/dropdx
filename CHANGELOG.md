@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+### Patch Changes
+
+- chore(release): automated patch release bump
+
 ## v0.4.0 - 2026-10-26
 
 ### ✨ Features
