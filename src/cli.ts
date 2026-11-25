@@ -24,7 +24,9 @@ import type {
   CliOptions,
   EngineType,
   GitEnvironmentInfo,
+  JsrRegistryInfo,
   NpmRegistryInfo,
+  PublishResult,
   VersionBump,
   WorkspacePackage,
 } from './types.js';
@@ -52,6 +54,13 @@ import {
   formatReleaseCommitMessage,
   pushGit,
 } from './utils/git.js';
+import {
+  fetchJsrRegistryInfo,
+  getLatestPublishedVersion,
+  publishJsrPackages,
+  readJsrPackageConfig,
+  updateJsrPackageVersion,
+} from './utils/jsr.js';
 import { resolveRegistry } from './utils/npmrc.js';
 import { findPackages, sortPackagesTopologically } from './utils/packages.js';
 import { checkNpmWhoami, fetchNpmRegistryInfo } from './utils/registry.js';
@@ -241,7 +250,7 @@ export async function cli(
 
   if (options.dryRun) {
     console.log(
-      `  ${yellow(bold('⚡ DRY-RUN MODE ACTIVE'))}: No changes will be pushed to git or published to npm.\n`
+      `  ${yellow(bold('⚡ DRY-RUN MODE ACTIVE'))}: No changes will be pushed to git or published to npm${options.publishToJsr ? ' or JSR' : ''}.\n`
     );
   }
 
@@ -307,6 +316,23 @@ export async function cli(
     process.exit(1);
   }
 
+  const jsrConfigs = new Map<string, ReturnType<typeof readJsrPackageConfig>>();
+  if (options.publishToJsr) {
+    for (const pkg of publishablePackages) {
+      try {
+        const jsrConfig = readJsrPackageConfig(pkg.directory);
+        jsrConfigs.set(pkg.name, jsrConfig);
+        logSuccess(
+          `${bold(pkg.name)}: JSR package config found for ${jsrConfig.name}`
+        );
+      } catch (error: unknown) {
+        const err = error as Error;
+        logError(`JSR publishing configuration error: ${err.message}`);
+        process.exit(1);
+      }
+    }
+  }
+
   logInfo(
     `Found ${bold(String(publishablePackages.length))} publishable package(s):`
   );
@@ -322,6 +348,15 @@ export async function cli(
   logStep(3, totalSteps, 'Release Engine Selection', '⚙️');
 
   const engine = detectEngine(rootDir, publishablePackages, options);
+  if (
+    options.publishToJsr &&
+    ['release-it', 'semantic-release', 'np'].includes(engine)
+  ) {
+    logError(
+      `JSR publishing cannot be combined with the delegated "${engine}" engine. Select --engine internal or a version-only engine.`
+    );
+    process.exit(1);
+  }
   const engineName = purple(engine.toUpperCase());
   logInfo(`Selected release engine: ${bold(engineName)}`);
 
@@ -356,23 +391,60 @@ export async function cli(
   for (const pkg of publishablePackages) {
     const pkgRegistry = resolveRegistry(pkg.name, options, rootDir);
     logInfo(`Checking ${bold(pkg.name)} on ${dim(pkgRegistry)}...`);
-    const regInfo = await fetchNpmRegistryInfo(pkg.name, pkgRegistry);
-    initialRegistryInfo.set(pkg.name, regInfo);
+    const npmRegInfo = await fetchNpmRegistryInfo(pkg.name, pkgRegistry);
+    let jsrRegInfo: JsrRegistryInfo | undefined;
+    if (options.publishToJsr) {
+      const jsrConfig = jsrConfigs.get(pkg.name);
+      if (!jsrConfig) {
+        logError(`Missing JSR package config for "${pkg.name}".`);
+        process.exit(1);
+      }
+      logInfo(`Checking ${bold(jsrConfig.name)} on JSR...`);
+      try {
+        jsrRegInfo = await fetchJsrRegistryInfo(jsrConfig.name);
+      } catch (error: unknown) {
+        const err = error as Error;
+        logError(
+          `Failed to check JSR package "${jsrConfig.name}": ${err.message}`
+        );
+        process.exit(1);
+      }
+    }
 
-    if (regInfo.exists) {
-      const isOwner = hasOwnershipAccess(regInfo, npmUser);
+    const latestVersion = getLatestPublishedVersion(
+      npmRegInfo.latestVersion,
+      jsrRegInfo?.latestVersion
+    );
+    initialRegistryInfo.set(pkg.name, {
+      exists: npmRegInfo.exists || Boolean(jsrRegInfo?.exists),
+      isUnpublished: npmRegInfo.isUnpublished,
+      latestVersion,
+      maintainers: npmRegInfo.maintainers,
+    });
+
+    if (npmRegInfo.exists) {
+      const isOwner = hasOwnershipAccess(npmRegInfo, npmUser);
       if (isOwner) {
         logSuccess(
-          `${bold(pkg.name)}: Verified owner permissions for ${green(npmUser)} (registry v${regInfo.latestVersion})`
+          `${bold(pkg.name)}: Verified owner permissions for ${green(npmUser)} (npm v${npmRegInfo.latestVersion})`
         );
       } else {
         logWarn(
-          `User "${npmUser}" is not in the maintainer list for "${pkg.name}" (${regInfo.maintainers.join(', ')}). Publication might require permissions.`
+          `User "${npmUser}" is not in the maintainer list for "${pkg.name}" (${npmRegInfo.maintainers.join(', ')}). Publication might require permissions.`
         );
       }
     } else {
       logInfo(
-        `${bold(pkg.name)}: Package not found on registry ${cyan('(First release)')}`
+        `${bold(pkg.name)}: Package not found on npm registry ${cyan('(First release)')}`
+      );
+    }
+
+    const jsrConfig = jsrConfigs.get(pkg.name);
+    if (jsrRegInfo && jsrConfig) {
+      logInfo(
+        jsrRegInfo.exists
+          ? `${bold(jsrConfig.name)}: Latest JSR version is ${jsrRegInfo.latestVersion}`
+          : `${bold(jsrConfig.name)}: Package not found on JSR ${cyan('(First release)')}`
       );
     }
   }
@@ -384,6 +456,26 @@ export async function cli(
     initialRegistryInfo,
     options
   );
+
+  if (options.publishToJsr && !options.dryRun) {
+    for (const pkg of publishablePackages) {
+      const jsrConfig = jsrConfigs.get(pkg.name);
+      const version = updatedVersionsMap.get(pkg.name);
+      if (!jsrConfig || !version) {
+        logError(`Cannot synchronize JSR version for "${pkg.name}".`);
+        process.exit(1);
+      }
+      try {
+        updateJsrPackageVersion(jsrConfig.configPath, version);
+      } catch (error: unknown) {
+        const err = error as Error;
+        logError(
+          `Failed to update JSR package config "${jsrConfig.configPath}": ${err.message}`
+        );
+        process.exit(1);
+      }
+    }
+  }
 
   logSuccess('Version calculation complete:');
   for (const bump of versionBumps) {
@@ -478,22 +570,46 @@ export async function cli(
   // --------------------------------------------------------------------------
   // STEP 7: Publish Packages to Registry
   // --------------------------------------------------------------------------
-  logStep(7, totalSteps, 'Publishing Packages to Registry', '🚀');
+  logStep(
+    7,
+    totalSteps,
+    options.publishToJsr
+      ? 'Publishing Packages to npm and JSR'
+      : 'Publishing Packages to Registry',
+    '🚀'
+  );
 
-  const publishResults = publishPackages(
+  const npmPublishResults = publishPackages(
     publishablePackages,
     updatedVersionsMap,
     options,
     rootDir
   );
+  let jsrPublishResults: PublishResult[] = [];
+  if (options.publishToJsr) {
+    if (npmPublishResults.every((result) => result.success)) {
+      jsrPublishResults = publishJsrPackages(
+        publishablePackages,
+        updatedVersionsMap,
+        jsrConfigs,
+        options,
+        rootDir
+      );
+    } else {
+      logError(
+        'Skipping JSR publishing because npm publishing did not complete successfully.'
+      );
+    }
+  }
+  const publishResults = [...npmPublishResults, ...jsrPublishResults];
 
   // --------------------------------------------------------------------------
   // Summary Table
   // --------------------------------------------------------------------------
   logTable(publishResults, { ...options, tag: gitTagName });
 
-  const allSucceeded = publishResults.every((r) => r.success);
-  if (!allSucceeded) {
+  const haveAllSucceeded = publishResults.every((r) => r.success);
+  if (!haveAllSucceeded) {
     process.exit(1);
   }
 }

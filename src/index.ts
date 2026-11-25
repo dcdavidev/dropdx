@@ -40,6 +40,14 @@ export {
   isConventionalCommitMessage,
   parseConventionalCommit,
 } from './utils/git.js';
+export {
+  buildJsrPublishCommand,
+  fetchJsrRegistryInfo,
+  getLatestPublishedVersion,
+  publishJsrPackages,
+  readJsrPackageConfig,
+  updateJsrPackageVersion,
+} from './utils/jsr.js';
 export { resolveRegistry } from './utils/npmrc.js';
 export { findPackages, sortPackagesTopologically } from './utils/packages.js';
 export {

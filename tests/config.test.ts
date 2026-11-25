@@ -166,6 +166,23 @@ describe('cosmiconfig loader, multi-format parsers, and precedence', () => {
     }
   });
 
+  it('enables optional JSR publishing through config and CLI flags', () => {
+    const tmpDir = mkdtempSync(path.join(os.tmpdir(), 'dropdx-jsr-config-'));
+    try {
+      writeFileSync(
+        path.join(tmpDir, 'dropdx.config.json'),
+        '{"publishToJsr":true}',
+        'utf8'
+      );
+
+      expect(parseArgs([], tmpDir).publishToJsr).toBe(true);
+      expect(parseArgs(['--no-jsr'], tmpDir).publishToJsr).toBe(false);
+      expect(parseArgs(['--jsr'], tmpDir).publishToJsr).toBe(true);
+    } finally {
+      rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   it('parses and loads JSONC configuration files with comments and trailing commas', () => {
     const jsoncContent = `{
       // Enable conventional commits

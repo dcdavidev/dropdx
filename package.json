@@ -61,7 +61,8 @@
     "update:turbo": "pnpm exec tsx ./scripts/update-turbo.ts"
   },
   "dependencies": {
-    "cosmiconfig": "9.0.2"
+    "cosmiconfig": "9.0.2",
+    "jsonc-parser": "^3.3.1"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.1",

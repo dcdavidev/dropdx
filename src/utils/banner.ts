@@ -124,6 +124,8 @@ ${purple(bold('Version Bump Options:'))}
 
 ${purple(bold('Registry & Publish Options:'))}
   ${cyan('--registry <url>')}              npm registry (default: from .npmrc or https://registry.npmjs.org/)
+  ${cyan('--jsr')}                         Also publish each package to JSR (requires a JSR package config)
+  ${cyan('--no-jsr')}                      Disable JSR publishing from configuration
   ${cyan('--tag <name>')}                  npm dist-tag (default: latest)
   ${cyan('--access <public|restricted>')}  npm access level (default: public)
   ${cyan('--otp <code>')}                  npm 2FA one-time password
@@ -136,7 +138,7 @@ ${purple(bold('Engine & Workflow Options:'))}
   ${cyan('-d, --dry-run')}                 Simulate checks, bump, build and publish without remote changes
   ${cyan('--skip-build')}                  Skip the package build step
   ${cyan('--skip-git')}                    Skip git commit, tag and push
-  ${cyan('--skip-publish')}                Skip publishing to the npm registry
+  ${cyan('--skip-publish')}                Skip publishing to npm and JSR
   ${cyan('--allow-dirty')}                 Allow running with uncommitted changes in the git repo
   ${cyan('-f, --force')}                   Force overwriting the config file (with "init")
 

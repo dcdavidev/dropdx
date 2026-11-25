@@ -23,6 +23,7 @@ export interface DropdxConfig {
   version?: string;
   conventionalCommits?: boolean;
   registry?: string;
+  publishToJsr?: boolean;
   engine?: EngineType;
   dryRun?: boolean;
   skipBuild?: boolean;
@@ -41,6 +42,7 @@ export interface CliOptions {
   conventionalCommits?: boolean;
   dryRun: boolean;
   registry?: string;
+  publishToJsr: boolean;
   tag: string;
   access: AccessType;
   otp?: string;
@@ -87,6 +89,11 @@ export interface NpmRegistryInfo {
   isUnpublished: boolean;
   latestVersion?: string;
   maintainers: string[];
+}
+
+export interface JsrRegistryInfo {
+  exists: boolean;
+  latestVersion?: string;
 }
 
 export interface VersionBump {

@@ -18,6 +18,9 @@ properties:
     type: string
     format: uri
     description: Registry URL to use for package publication.
+  publishToJsr:
+    type: boolean
+    description: Publish packages to JSR in addition to the npm registry.
   engine:
     type: string
     enum:

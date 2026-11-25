@@ -60,6 +60,7 @@ export const DEFAULT_OPTIONS: CliOptions = {
   conventionalCommits: undefined,
   dryRun: false,
   registry: undefined,
+  publishToJsr: false,
   tag: 'latest',
   access: 'public',
   otp: undefined,
@@ -143,6 +144,9 @@ function applyConfigToOptions(
   }
   if (config.registry !== undefined) {
     options.registry = config.registry;
+  }
+  if (config.publishToJsr !== undefined) {
+    options.publishToJsr = Boolean(config.publishToJsr);
   }
   if (config.engine !== undefined) {
     options.engine = config.engine;
@@ -265,6 +269,14 @@ function handleArg(options: CliOptions, argv: string[], index: number): number {
     case '--registry': {
       options.registry = argv[index + 1];
       return index + 2;
+    }
+    case '--jsr': {
+      options.publishToJsr = true;
+      return index + 1;
+    }
+    case '--no-jsr': {
+      options.publishToJsr = false;
+      return index + 1;
     }
     case '--tag': {
       options.tag = argv[index + 1] || 'latest';

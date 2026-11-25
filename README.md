@@ -38,7 +38,7 @@ Publishing npm packages manually or in complex monorepos often involves repetiti
 - Forgetting to bump internal dependency versions between workspace packages.
 - Overlooking git commit, annotated tagging, or remote branch synchronization.
 
-**dropdx** streamlines this entire process into a single command with zero initial configuration required. It inspects your repository, queries your registry, determines whether version bumps are necessary, updates changelogs, builds packages, creates annotated Git tags, pushes to remote origin, and publishes packages reliably.
+**dropdx** streamlines this entire process into a single command with zero initial configuration required. It inspects your repository, queries registries, determines whether version bumps are necessary, updates changelogs, builds packages, creates annotated Git tags, pushes to remote origin, and publishes packages reliably.
 
 ---
 
@@ -47,10 +47,11 @@ Publishing npm packages manually or in complex monorepos often involves repetiti
 - 🔐 **Npm Registry Authentication & Maintainer Checks**: Verifies credentials via `npm whoami` and validates maintainer permissions before publishing.
 - 📦 **Automated SemVer Bumping & Conventional Commits**: Automatically analyzes Git history since the previous tag using the Conventional Commits specification to determine whether a `major` (breaking changes), `minor` (features), or `patch` bump is required. Also compares local versions against the registry so that `targetVersion > publishedVersion`.
 - 🌐 **Smart Registry Resolution**: Resolves registries automatically from `--registry` flags, project `.npmrc` (including scoped registries like `@my-org:registry`), user-level `~/.npmrc`, or falls back to `https://registry.npmjs.org/`.
+- 🦕 **Optional JSR Publishing**: Publish each package to both npm and JSR with `--jsr` or `publishToJsr: true`; JSR versions are checked and synchronized with npm release versions.
 - ⚙️ **Automatic Engine Detection**: Automatically detects whether `@changesets/cli` or `release-it` is configured in your project and delegates to them, or runs its zero-dependency built-in engine.
 - 🏢 **Monorepo & Standalone Ready**: Automatically detects standalone packages, pnpm workspaces (`pnpm-workspace.yaml`), npm/yarn workspaces (`package.json`), or Lerna. Only packages with `"private": false` (or without `private: true`) are published, sorted topologically according to internal package dependencies.
 - 🏷️ **Git & Structured Changelog Automation**: Commits modified files with a Conventional Commit (`chore(release): vX.Y.Z [skip ci]`), generates/prepends `CHANGELOG.md` with structured sections (Breaking Changes, Features, Bug Fixes, etc.), creates annotated Git tags (e.g. `v1.2.0`), and pushes commits and tags to remote origin.
-- ⚡ **Safe Dry-Run Mode**: Inspect everything with `--dry-run` without making any git changes or publishing to npm.
+- ⚡ **Safe Dry-Run Mode**: Inspect everything with `--dry-run` without making any git changes or publishing to npm or JSR.
 - 🛡️ **CI/CD Ready**: Supports `--provenance` attestation, `--otp` two-factor authentication, and non-interactive CI workflows.
 - 🎨 **Purple & Lavender Visuals**: Truecolor ANSI styling with expressive emojis inspired by the Spellbookx suite.
 - 🤖 **AI Agent Skills**: Built-in `.agents/skills` enabling AI coding assistants to automatically configure, dry-run, and execute release pipelines.
@@ -170,6 +171,8 @@ Usage:
 | `--force-bump`     |           | Force version bump even when local version > registry version   | `false`                        |
 | `--summary <text>` | `-m`      | Release summary note (used in commit message & changelog)       | Auto-generated                 |
 | `--registry <url>` |           | Target npm registry URL                                         | From `.npmrc` or npmjs.org     |
+| `--jsr`            |           | Also publish each package to JSR                                | `false`                        |
+| `--no-jsr`         |           | Disable JSR publishing enabled in config                        |                                |
 | `--tag <name>`     |           | npm dist-tag (e.g., `latest`, `beta`, `next`)                   | `latest`                       |
 | `--access <level>` |           | Package access level: `public` or `restricted`                  | `public`                       |
 | `--otp <code>`     |           | Two-factor authentication (2FA) one-time password               |                                |
@@ -182,7 +185,7 @@ Usage:
 | `--dry-run`        | `-d`      | Simulate validations, bumps, build, and publish without changes | `false`                        |
 | `--skip-build`     |           | Skip running package build scripts                              | `false`                        |
 | `--skip-git`       |           | Skip git commit, tag, and push steps                            | `false`                        |
-| `--skip-publish`   |           | Skip publishing packages to the registry                        | `false`                        |
+| `--skip-publish`   |           | Skip publishing packages to npm and JSR                         | `false`                        |
 | `--allow-dirty`    |           | Allow release even with uncommitted changes in git repository   | `false`                        |
 | `--help`           | `-h`      | Display help screen                                             |                                |
 | `--version`        | `-v`      | Display `dropdx` version                                        |                                |
@@ -300,6 +303,24 @@ skipPublish = false
 allowDirty = false
 ```
 
+### Publish to JSR as well as npm
+
+JSR publishing is opt-in. Enable it with `dropdx --jsr` or set `publishToJsr: true` in a dropdx config file. `--no-jsr` disables the config setting for one run. The existing `registry` option and `.npmrc` continue to configure npm; JSR publication runs through the JSR CLI.
+
+Every package published to JSR must include a `jsr.json`, `jsr.jsonc`, `deno.json`, or `deno.jsonc` file with a scoped package name, a SemVer version, and exports. For example:
+
+```json
+{
+  "name": "@my-scope/my-package",
+  "version": "1.2.3",
+  "exports": "./src/index.ts"
+}
+```
+
+When a release is run, dropdx compares the highest published version across npm and JSR, then synchronizes the JSR manifest version with the resulting package version. JSR CLI authentication is handled interactively in local runs; GitHub Actions can use JSR's OIDC publishing after linking the JSR package to the GitHub repository and granting `id-token: write`. See the [JSR publishing guide](https://jsr.io/docs/publishing-packages).
+
+JSR publishing works with the built-in engine and version-only engines such as Changesets, Lerna, Bumpp, and Standard-Version. Full-lifecycle delegated engines (`release-it`, `semantic-release`, and `np`) are not supported in dual-publish mode because they handle npm publishing themselves.
+
 ---
 
 ## The 7-Step Release Pipeline
@@ -335,8 +356,9 @@ When executed, `dropdx` follows a structured 7-phase release pipeline:
   ├── Create annotated tag: `vX.Y.Z`
   └── Push branch and tag to remote origin (unless --skip-git)
 
-[7/7] 🚀 Publishing Packages to Registry
-  ├── Publish packages with configured access, dist-tag, and provenance
+[7/7] 🚀 Publishing Packages to Registries
+  ├── Publish to npm with configured access, dist-tag, and provenance
+  ├── Optionally publish to JSR after successful npm publishing
   └── Display final formatted summary table
 ```
 

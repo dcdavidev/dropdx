@@ -1,6 +1,6 @@
 ---
 name: dropdx
-description: Guides automated package releasing, SemVer version bumping, Conventional Commits changelog generation, .npmrc registry resolution, and npm publishing for single packages and monorepos using the @dcdavidev/dropdx CLI and programmatic TypeScript API.
+description: Guides automated package releasing, SemVer version bumping, Conventional Commits changelog generation, npm registry resolution, and npm or JSR publishing for single packages and monorepos using the @dcdavidev/dropdx CLI and programmatic TypeScript API.
 ---
 
 # dropdx Skill
@@ -14,6 +14,7 @@ This skill guides an AI agent through configuring, testing (dry-running), troubl
 Activate this skill when:
 
 - Releasing and publishing a single npm package or a multi-package monorepo (`pnpm`, `npm`, `yarn`, or `lerna`).
+- Publishing packages to both npm and JSR with `--jsr` or `publishToJsr: true`.
 - Running safe pre-release simulations (`--dry-run`) to verify version bumps, build scripts, git tags, and registry permissions.
 - Automating SemVer version calculations (`patch`, `minor`, `major`, `prerelease`) based on Conventional Commits and live npm registry versions.
 - Configuring `package.json` release scripts or GitHub Actions CI/CD release workflows with npm provenance.
@@ -55,6 +56,7 @@ npx @dcdavidev/dropdx [options]
 | **Release with custom commit & changelog summary**       | `pnpm exec dropdx -m "feat: add new API endpoints"`   |
 | **Publish to a specific dist-tag (e.g. `beta`, `next`)** | `pnpm exec dropdx --prerelease --tag next`            |
 | **Publish to a custom registry URL**                     | `pnpm exec dropdx --registry https://npm.my-org.com/` |
+| **Publish to npm and JSR**                               | `pnpm exec dropdx --jsr`                               |
 | **Publish with 2FA One-Time Password (OTP)**             | `pnpm exec dropdx --otp 123456`                       |
 | **Stage publish for 2FA approval (`npm stage publish`)** | `pnpm exec dropdx --stage`                            |
 | **Publish in CI with npm provenance attestation**        | `pnpm exec dropdx --provenance`                       |
@@ -73,6 +75,8 @@ npx @dcdavidev/dropdx [options]
 | `--force-bump`     |           | Force version bump even when local `package.json` version > registry      | `false`                      |
 | `--summary <text>` | `-m`      | Release summary note (used in commit message & changelog fallback)        | Auto-generated               |
 | `--registry <url>` |           | Target npm registry URL override                                          | From `.npmrc` or `npmjs.org` |
+| `--jsr`            |           | Also publish packages to JSR                                              | `false`                      |
+| `--no-jsr`         |           | Disable JSR publishing enabled in config                                  |                              |
 | `--tag <name>`     |           | npm distribution tag (e.g., `latest`, `beta`, `next`)                     | `latest`                     |
 | `--access <level>` |           | Package access level: `public` or `restricted`                            | `public`                     |
 | `--otp <code>`     |           | Two-factor authentication (2FA) one-time password                         |                              |
@@ -85,10 +89,20 @@ npx @dcdavidev/dropdx [options]
 | `--dry-run`        | `-d`      | Simulate validations, bumps, build, git, and publish without side effects | `false`                      |
 | `--skip-build`     |           | Skip running package build scripts                                        | `false`                      |
 | `--skip-git`       |           | Skip git commit, annotated tag, and remote push steps                     | `false`                      |
-| `--skip-publish`   |           | Skip publishing packages to the npm registry                              | `false`                      |
+| `--skip-publish`   |           | Skip publishing packages to npm and JSR                                   | `false`                      |
 | `--allow-dirty`    |           | Allow running with uncommitted changes in the git working tree            | `false`                      |
 | `--version`        | `-v`      | Print the installed `dropdx` version                                      |                              |
 | `--help`           | `-h`      | Display CLI help and usage reference                                      |                              |
+
+---
+
+## Publishing to JSR
+
+JSR publishing is opt-in and runs alongside npm publishing. Every package included in JSR publishing needs a `jsr.json`, `jsr.jsonc`, `deno.json`, or `deno.jsonc` file declaring a scoped `name`, SemVer `version`, and `exports`. dropdx checks the latest versions on both registries and synchronizes the JSR manifest to the calculated release version.
+
+The JSR CLI handles local authentication interactively. GitHub Actions can use OIDC after the JSR package is linked to the repository; grant the workflow `id-token: write`. See the [JSR publishing guide](https://jsr.io/docs/publishing-packages).
+
+JSR dual publishing supports the built-in engine and version-only engines. Full-lifecycle delegated engines (`release-it`, `semantic-release`, and `np`) are incompatible because they publish to npm themselves.
 
 ---
 
@@ -110,17 +124,18 @@ When invoked, `dropdx` executes a deterministic 7-step release pipeline:
    - Inspects Git history since the latest tag to determine whether the repository uses **Conventional Commits** (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`) or **non-conventional commits**:
      - **Conventional History**: Auto-detects `major` (`BREAKING CHANGE` / `!:`), `minor` (`feat`), or `patch` (fixes/chores/maintenance), generates categorized emoji sections in `CHANGELOG.md`, and formats release commits as `chore(release): bump to vX.Y.Z` (auto-prefixing custom `--summary` strings if needed).
      - **Non-Conventional History**: Defaults safely to `patch` (unless an explicit breaking change note is found), writes a clean flat commit list in `CHANGELOG.md`, and formats release commits as `Release vX.Y.Z`.
-   - Queries the npm registry for each package's currently published `latest` version and checks maintainer ownership.
-   - Calculates the next version ensuring `targetVersion > registryVersion` (and forces a bump if a local git tag `v<version>` already exists or `--force-bump` / explicit bump is set).
-   - Updates `package.json` versions, internal workspace dependency ranges (`^`, `~`, exact), and `CHANGELOG.md`.
+   - Queries the npm registry and, when `--jsr` is enabled, JSR for each package's latest version; npm maintainer ownership is checked as before.
+   - Calculates the next version ensuring it exceeds the latest version on either registry (and forces a bump if a local git tag `v<version>` already exists or `--force-bump` / explicit bump is set).
+   - Updates `package.json` versions, internal workspace dependency ranges (`^`, `~`, exact), `CHANGELOG.md`, and enabled JSR manifest versions.
 5. **`[5/7]` Building Packages**:
    - Runs root `pnpm run build` / `npm run build` if present, or iterates through each publishable package's `build` script in topological order (unless `--skip-build` is set).
 6. **`[6/7]` Git Commit, Tag & Push**:
    - Stages changes (`git add .`) and commits (`chore(release): bump to vX.Y.Z` or custom `--summary`).
    - Creates an annotated Git tag `vX.Y.Z` after verifying the tag does not already exist locally or on remote `origin`.
    - Pushes the branch and annotated tag to `origin` (unless `--skip-git` or `--dry-run` is active).
-7. **`[7/7]` Publishing Packages to Registry**:
-   - Publishes each package in topological order using `pnpm publish` or `npm publish` with `--registry`, `--access`, `--no-git-checks`, `--tag`, and optional `--otp` / `--provenance` / `--dry-run`.
+7. **`[7/7]` Publishing Packages to Registries**:
+   - Publishes each package to npm in topological order using `pnpm publish` or `npm publish` with `--registry`, `--access`, `--no-git-checks`, `--tag`, and optional `--otp` / `--provenance` / `--dry-run`.
+   - When `--jsr` is enabled and npm publishing succeeds, publishes each package to JSR using `pnpm dlx jsr publish` or `npx jsr publish`. JSR handles authentication through local login or GitHub Actions OIDC.
    - When `--stage` (`stage: true` in config) is passed, or when direct publishing fails due to a Two-Factor Authentication (`EOTP` / 2FA) requirement, `dropdx` stages the release via `npm stage publish` / `pnpm stage publish`. In interactive TTY environments, `dropdx` prompts for an OTP and runs `npm stage approve <stage-id>` automatically; in CI/non-TTY environments, it prints the `npm stage approve` command for human approval.
    - Prints a final summary table of published/staged packages and versions.
 

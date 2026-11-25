@@ -4,7 +4,7 @@ This guide describes the layout, configuration conventions, build pipeline, and 
 
 ## Overview
 
-dropdx is a single-package TypeScript and ECMAScript Module (`"type": "module"`) CLI and library for automated releases and npm publishing. It is built on the [spellbookx-template-singlerepo](https://github.com/dcdavidev/spellbookx-template-singlerepo) layout and the Spellbookx developer toolchain:
+dropdx is a single-package TypeScript and ECMAScript Module (`"type": "module"`) CLI and library for automated releases and publishing to npm, with optional JSR dual publishing. It is built on the [spellbookx-template-singlerepo](https://github.com/dcdavidev/spellbookx-template-singlerepo) layout and the Spellbookx developer toolchain:
 
 - **Runtime & package manager**: Node.js `26.x` (pinned in [`.nvmrc`](../../.nvmrc)) and pnpm `12.x` (pinned via `packageManager` in [`package.json`](../../package.json)).
 - **Language & compiler**: TypeScript targeting `ES2024` with `NodeNext` module resolution and strict type-checking.
