@@ -405,7 +405,7 @@ export function analyzeCommitsForBump(
  * @returns Detected bump type ('major' | 'minor' | 'patch'), explanation, commit list, and conventional status.
  */
 export function detectBumpFromCommits(
-  rootDir: string = process.cwd(),
+  rootDir: string,
   options: { conventionalCommits?: boolean } = {}
 ): BumpDetectionResult {
   const latestTag = getLatestTag(rootDir);

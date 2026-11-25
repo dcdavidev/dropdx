@@ -92,7 +92,9 @@ export function loadConfigFile(
     try {
       const raw = readFileSync(fullPath, 'utf8');
       const parsed = parseConfigContent(raw, fullPath);
-      const relativePath = path.relative(rootDir, fullPath) || candidate;
+      const relativePath = (
+        path.relative(rootDir, fullPath) || candidate
+      ).replaceAll(path.sep, '/');
       return { config: parsed, configPath: relativePath };
     } catch (error: unknown) {
       const err = error as Error;

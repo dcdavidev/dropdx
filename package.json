@@ -18,9 +18,10 @@
     "url": "git+https://github.com/dcdavidev/dropdx.git"
   },
   "license": "MIT",
-  "author": "Davide Di Criscito <dcdavidev@gmail.com>",
+  "author": "Davide Di Criscito <info@dcdavidev.com>",
   "type": "module",
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
@@ -28,6 +29,7 @@
     }
   },
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
     "dropdx": "bin/dropdx.js"
@@ -37,46 +39,54 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "check": "pnpm run build && pnpm run lint && pnpm run spellcheck && pnpm run test",
-    "check:ci": "pnpm run build && pnpm run lint:check && pnpm run fmt:check && pnpm run spellcheck && pnpm run test",
-    "commit": "cz",
-    "commit:lint": "commitlint --from=HEAD~1",
+    "build": "tsc -p tsconfig.build.json",
+    "changeset": "changeset",
+    "changeset:commits": "changeset-conventional",
+    "changeset:version": "changeset version",
+    "check": "turbo run build lint:code lint:spelling lint:types fmt:check test",
+    "commit": "czg",
     "fmt": "prettier --ignore-unknown --write .",
     "fmt:check": "prettier --ignore-unknown --check .",
-    "lint": "eslint --no-warn-ignored --fix .",
-    "lint:check": "eslint --no-warn-ignored .",
+    "lint": "turbo run lint:code lint:spelling",
+    "lint:code": "eslint --no-warn-ignored .",
+    "lint:code:fix": "eslint --no-warn-ignored --fix .",
+    "lint:commits": "commitlint --from=HEAD~1 --verbose",
+    "lint:spelling": "cspell --no-progress --no-summary .",
+    "lint:types": "tsc --noEmit",
     "prepack": "pnpm run build",
     "prepare": "lefthook install",
     "release": "pnpm run build && node bin/dropdx.js",
-    "spellcheck": "cspell --no-progress --no-summary .",
-    "test": "pnpm run build && node --test"
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-git"
-    }
+    "test": "vitest run --no-fsModuleCache --passWithNoTests --coverage",
+    "update:node": "pnpm exec tsx ./scripts/update-node.ts",
+    "update:turbo": "pnpm exec tsx ./scripts/update-turbo.ts"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.3",
     "@commitlint/cli": "^21.2.4",
-    "@cspell/dict-it-it": "^3.1.7",
-    "@dcdavidev/tsconfig": "^0.1.0",
-    "@spellbookx/recipes": "^1.1.0",
-    "@types/node": "^26.6.5",
-    "commitizen": "^4.3.2",
-    "commitlint-config-spellbookx": "^1.0.2",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@spellbookx/recipes": "^2.1.3",
+    "@types/node": "^26.6.6",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "@vitest/coverage-v8": "^5.1.1",
+    "changeset-conventional-commits": "^1.0.4",
+    "commitlint-config-spellbookx": "^2.1.3",
     "conventional-changelog-conventionalcommits": "^10.4.1",
-    "cspell": "^10.4.0",
-    "cspell-config-spellbookx": "^1.0.2",
-    "cz-git": "^1.14.0",
-    "eslint": "^10.13.0",
-    "eslint-plugin-spellbookx": "^1.1.0",
+    "cspell": "^10.5.2",
+    "cspell-config-spellbookx": "^2.1.3",
+    "cz-config-spellbookx": "^2.1.3",
+    "czg": "^1.14.0",
+    "eslint": "^10.15.0",
+    "eslint-plugin-spellbookx": "^2.1.3",
     "lefthook": "^2.2.2",
-    "prettier": "^3.9.10",
-    "prettier-config-spellbookx": "^1.0.2",
-    "typescript": "^5.9.3"
+    "prettier": "^3.10.1",
+    "prettier-config-spellbookx": "^2.1.3",
+    "tsx": "^4.23.15",
+    "turbo": "^2.11.13",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vitest": "^5.1.1"
   },
-  "packageManager": "pnpm@12.14.0",
+  "packageManager": "pnpm@12.23.0",
   "publishConfig": {
     "access": "public"
   }

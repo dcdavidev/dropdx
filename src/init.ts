@@ -63,7 +63,10 @@ export function runInit(
   const fullPath = path.isAbsolute(target)
     ? target
     : path.join(rootDir, target);
-  const relativePath = path.relative(rootDir, fullPath) || target;
+  const relativePath = (path.relative(rootDir, fullPath) || target).replaceAll(
+    path.sep,
+    '/'
+  );
 
   if (existsSync(fullPath) && !options.force) {
     logWarn(

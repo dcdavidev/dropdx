@@ -1,0 +1,22 @@
+# CSpell configuration
+# Documentation: https://cspell.org/docs/Configuration
+# yaml-language-server: $schema=https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
+
+version: '0.2'
+
+# Spellbookx preset: languages, technical dictionaries, and shared ignore globs.
+import:
+  - cspell-config-spellbookx
+
+# Project word list, one word per line. The path is relative to this file.
+dictionaryDefinitions:
+  - name: project-words
+    path: ./cspell/custom.txt
+    addWords: true
+
+dictionaries:
+  - project-words
+
+# Paths the preset does not already ignore.
+ignorePaths:
+  - skills-lock.json

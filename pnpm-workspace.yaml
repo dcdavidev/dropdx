@@ -1,5 +1,9 @@
 allowBuilds:
+  esbuild: true
   lefthook: true
+
+engineStrict: true
+
 minimumReleaseAgeExclude:
   - '@spellbookx/recipes'
   - eslint-plugin-spellbookx
@@ -8,3 +12,8 @@ minimumReleaseAgeExclude:
   - commitlint-config-spellbookx
   - cspell-config-spellbookx
   - prettier-config-spellbookx
+  - cz-config-spellbookx@2.1.3
+
+publicHoistPattern:
+  - '*prettier-plugin-*'
+  - '@prettier/plugin-*'

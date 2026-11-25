@@ -47,7 +47,7 @@ export function exec(cmd: string, options: ExecOptions = {}): string {
  */
 export function runInherited(
   cmd: string,
-  cwd: string = process.cwd(),
+  cwd: string,
   env: Record<string, string | undefined> = {}
 ): void {
   const result = spawnSync(cmd, {

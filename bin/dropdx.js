@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 /**
  * @file bin/dropdx.js
  * CLI executable for dropdx.

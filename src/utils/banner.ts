@@ -106,43 +106,43 @@ export function printHelp(): void {
   console.log(`
 ${purple(bold('🧙 DROPDX - Automated Release & Publish CLI 🚀'))}
 
-${purple(bold('Uso:'))}
-  ${cyan('npx dropdx')} [opzioni]
-  ${cyan('pnpm exec dropdx')} [opzioni]
-  ${cyan('dropdx')} [opzioni]
+${purple(bold('Usage:'))}
+  ${cyan('npx dropdx')} [options]
+  ${cyan('pnpm exec dropdx')} [options]
+  ${cyan('dropdx')} [options]
 
-${purple(bold('Comandi:'))}
-  ${cyan('init')}                          Genera .config/dropdx.config.json con la versione corrente di dropdx
-  ${cyan('init --force')}                  Sovrascrive un file di configurazione esistente
+${purple(bold('Commands:'))}
+  ${cyan('init')}                          Create .config/dropdx.config.json with the current dropdx version
+  ${cyan('init --force')}                  Overwrite an existing config file
 
-${purple(bold('Opzioni Version Bump:'))}
-  ${cyan('--bump <patch|minor|major>')}   Livello di incremento versione (default: patch)
-  ${cyan('--patch')}                       Scorciatoia per --bump patch
-  ${cyan('--minor')}                       Scorciatoia per --bump minor
-  ${cyan('--major')}                       Scorciatoia per --bump major
-  ${cyan('-m, --summary <testo>')}         Messaggio di sintesi / commit per la release
+${purple(bold('Version Bump Options:'))}
+  ${cyan('--bump <patch|minor|major>')}   Version bump level (default: patch)
+  ${cyan('--patch')}                       Shortcut for --bump patch
+  ${cyan('--minor')}                       Shortcut for --bump minor
+  ${cyan('--major')}                       Shortcut for --bump major
+  ${cyan('-m, --summary <text>')}          Summary / commit message for the release
 
-${purple(bold('Opzioni Registry & Pubblicazione:'))}
-  ${cyan('--registry <url>')}              Registry npm (default: da .npmrc o https://registry.npmjs.org/)
+${purple(bold('Registry & Publish Options:'))}
+  ${cyan('--registry <url>')}              npm registry (default: from .npmrc or https://registry.npmjs.org/)
   ${cyan('--tag <name>')}                  npm dist-tag (default: latest)
-  ${cyan('--access <public|restricted>')}  Livello di accesso npm (default: public)
-  ${cyan('--otp <code>')}                  Codice 2FA One-Time Password per npm
-  ${cyan('--stage')}                       Pubblica in staging queue npm (deferring 2FA a npm stage approve)
-  ${cyan('--provenance')}                  Genera provenance attestation (utile in CI)
+  ${cyan('--access <public|restricted>')}  npm access level (default: public)
+  ${cyan('--otp <code>')}                  npm 2FA one-time password
+  ${cyan('--stage')}                       Publish to the npm staging queue (defer 2FA to npm stage approve)
+  ${cyan('--provenance')}                  Generate a provenance attestation (useful in CI)
 
-${purple(bold('Opzioni Engine & Workflow:'))}
-  ${cyan('-c, --config <path>')}             File di configurazione (default: .config/dropdx.config.json)
+${purple(bold('Engine & Workflow Options:'))}
+  ${cyan('-c, --config <path>')}             Config file (default: .config/dropdx.config.json)
   ${cyan('--engine <name>')}                 Engine: auto, changeset, release-it, semantic-release, lerna, bumpp, standard-version, np, internal
-  ${cyan('-d, --dry-run')}                 Simula controlli, bump, build e publish senza modifiche remote
-  ${cyan('--skip-build')}                  Salta la fase di build dei pacchetti
-  ${cyan('--skip-git')}                    Salta commit, tag e push su git
-  ${cyan('--skip-publish')}                Salta la pubblicazione sul registry npm
-  ${cyan('--allow-dirty')}                 Permette l'esecuzione anche con modifiche non committate nel git repo
-  ${cyan('-f, --force')}                   Forza la sovrascrittura del file di configurazione (con "init")
+  ${cyan('-d, --dry-run')}                 Simulate checks, bump, build and publish without remote changes
+  ${cyan('--skip-build')}                  Skip the package build step
+  ${cyan('--skip-git')}                    Skip git commit, tag and push
+  ${cyan('--skip-publish')}                Skip publishing to the npm registry
+  ${cyan('--allow-dirty')}                 Allow running with uncommitted changes in the git repo
+  ${cyan('-f, --force')}                   Force overwriting the config file (with "init")
 
-${purple(bold('Informazioni Generali:'))}
-  ${cyan('-h, --help')}                    Mostra questo messaggio di aiuto
-  ${cyan('-v, --version')}                 Mostra la versione di dropdx
+${purple(bold('General:'))}
+  ${cyan('-h, --help')}                    Show this help message
+  ${cyan('-v, --version')}                 Show the dropdx version
 `);
 }
 

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "globalDependencies": [".nvmrc", "pnpm-lock.yaml"],
+  "globalPassThroughEnv": ["CI", "FORCE_COLOR"],
+  "tasks": {
+    "build": {
+      "inputs": ["src/**", "tsconfig*.json", "package.json"],
+      "outputs": ["dist/**"]
+    },
+    "lint:code": {
+      "inputs": ["$TURBO_DEFAULT$", "!dist/**", "!coverage/**"],
+      "outputs": []
+    },
+    "lint:spelling": {
+      "inputs": ["$TURBO_DEFAULT$", "!dist/**", "!coverage/**"],
+      "outputs": []
+    },
+    "lint:types": {
+      "inputs": [
+        "src/**",
+        "tests/**",
+        "scripts/**",
+        "tsconfig*.json",
+        "package.json"
+      ],
+      "outputs": []
+    },
+    "fmt:check": {
+      "inputs": ["$TURBO_DEFAULT$", "!dist/**", "!coverage/**"],
+      "outputs": []
+    },
+    "test": {
+      "inputs": [
+        "src/**",
+        "tests/**",
+        "vitest.config.*",
+        "tsconfig*.json",
+        "package.json"
+      ],
+      "outputs": ["coverage/**"]
+    }
+  }
+}
