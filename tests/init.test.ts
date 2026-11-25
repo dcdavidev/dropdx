@@ -46,11 +46,11 @@ describe('dropdx init command and config version compatibility', () => {
     expect(JSON.parse(serialized)).toStrictEqual(config);
   });
 
-  it('generates .config/dropdx.config.json stamped with the running CLI version', () => {
+  it('generates .config/dropdx.json stamped with the running CLI version', () => {
     const tmpDir = mkdtempSync(path.join(os.tmpdir(), 'dropdx-init-'));
     try {
       const relativePath = runInit({}, tmpDir);
-      expect(relativePath).toBe('.config/dropdx.config.json');
+      expect(relativePath).toBe('.config/dropdx.json');
 
       const written = JSON.parse(
         readFileSync(path.join(tmpDir, relativePath), 'utf8')
@@ -66,7 +66,7 @@ describe('dropdx init command and config version compatibility', () => {
   it('does not overwrite an existing config file unless force is set', () => {
     const tmpDir = mkdtempSync(path.join(os.tmpdir(), 'dropdx-init-force-'));
     try {
-      const configPath = path.join(tmpDir, '.config/dropdx.config.json');
+      const configPath = path.join(tmpDir, '.config/dropdx.json');
       runInit({}, tmpDir);
       writeFileSync(configPath, '{"version":"0.0.1"}', 'utf8');
 
@@ -135,7 +135,7 @@ describe('dropdx init command and config version compatibility', () => {
   });
 
   it('stamps the repository config file with the current CLI version', () => {
-    const configPath = path.join(process.cwd(), '.config/dropdx.config.json');
+    const configPath = path.join(process.cwd(), '.config/dropdx.json');
     const repoConfig = JSON.parse(readFileSync(configPath, 'utf8'));
     expect(repoConfig.version).toBe(getDropdxVersion());
   });

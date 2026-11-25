@@ -1,4 +1,4 @@
-# dropdx YAML configuration example (.config/dropdx.config.yaml)
+# dropdx YAML configuration example (dropdx.config.yml)
 # version: dropdx version that generated this file (run "dropdx init --force" to refresh)
 version: 0.3.0
 conventionalCommits: true

@@ -1,11 +1,12 @@
 /**
  * @file src/config.ts
- * Default configuration values, .config/dropdx.config.json loader, and CLI argument parsing.
+ * Default configuration values, cosmiconfig setup, and CLI argument parsing.
  */
 
-import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+
+import { cosmiconfigSync, defaultLoadersSync } from 'cosmiconfig';
 
 import type {
   AccessType,
@@ -14,28 +15,41 @@ import type {
   DropdxConfig,
   EngineType,
 } from './types.js';
-import { parseConfigContent } from './utils/config-parser.js';
+import { parseJsoncConfig, parseTomlConfig } from './utils/config-parser.js';
 
 /**
  * Default relative path for the dropdx configuration file.
  */
-export const DEFAULT_CONFIG_PATH = '.config/dropdx.config.json';
+export const DEFAULT_CONFIG_PATH = '.config/dropdx.json';
 
 /**
  * Ordered list of candidate configuration file paths searched automatically.
  */
 export const CONFIG_SEARCH_PATHS = [
   DEFAULT_CONFIG_PATH,
-  '.config/dropdx.config.jsonc',
-  '.config/dropdx.config.yaml',
-  '.config/dropdx.config.yml',
-  '.config/dropdx.config.toml',
+  '.config/dropdx.jsonc',
+  '.config/dropdx.yml',
+  '.config/dropdx.toml',
   'dropdx.config.json',
   'dropdx.config.jsonc',
-  'dropdx.config.yaml',
   'dropdx.config.yml',
   'dropdx.config.toml',
 ] as const;
+
+const configExplorer = cosmiconfigSync('dropdx', {
+  searchPlaces: [...CONFIG_SEARCH_PATHS],
+  searchStrategy: 'none',
+  cache: false,
+  ignoreEmptySearchPlaces: false,
+  loaders: {
+    noExt: (_filepath, content) => parseJsoncConfig(content),
+    '.json': (_filepath, content) => parseJsoncConfig(content),
+    '.jsonc': (_filepath, content) => parseJsoncConfig(content),
+    '.yml': defaultLoadersSync['.yml'],
+    '.yaml': defaultLoadersSync['.yaml'],
+    '.toml': (_filepath, content) => parseTomlConfig(content),
+  },
+});
 
 /**
  * Default CLI pipeline options.
@@ -65,8 +79,8 @@ export const DEFAULT_OPTIONS: CliOptions = {
 };
 
 /**
- * Discovers and loads a dropdx configuration file from `.config/dropdx.config.json`,
- * `dropdx.config.json`, or an explicit file path.
+ * Discovers and loads a dropdx configuration file from `.config/`, the workspace
+ * root, or an explicit file path.
  *
  * @param rootDir - Project root directory.
  * @param customConfigPath - Optional explicit config file path from `--config`.
@@ -76,36 +90,34 @@ export function loadConfigFile(
   rootDir: string = process.cwd(),
   customConfigPath?: string
 ): { config: DropdxConfig; configPath?: string } {
-  const candidates = customConfigPath
-    ? [customConfigPath]
-    : [...CONFIG_SEARCH_PATHS];
+  const absoluteRootDir = path.resolve(rootDir);
+  const result = customConfigPath
+    ? configExplorer.load(path.resolve(absoluteRootDir, customConfigPath))
+    : configExplorer.search(absoluteRootDir);
 
-  for (const candidate of candidates) {
-    const fullPath = path.isAbsolute(candidate)
-      ? candidate
-      : path.join(rootDir, candidate);
-
-    if (!existsSync(fullPath)) {
-      continue;
-    }
-
-    try {
-      const raw = readFileSync(fullPath, 'utf8');
-      const parsed = parseConfigContent(raw, fullPath);
-      const relativePath = (
-        path.relative(rootDir, fullPath) || candidate
-      ).replaceAll(path.sep, '/');
-      return { config: parsed, configPath: relativePath };
-    } catch (error: unknown) {
-      const err = error as Error;
-      throw new Error(
-        `Failed to parse configuration file "${candidate}": ${err.message}`,
-        { cause: error }
-      );
-    }
+  if (!result) {
+    return { config: {}, configPath: undefined };
   }
 
-  return { config: {}, configPath: undefined };
+  const configPath = path
+    .relative(absoluteRootDir, result.filepath)
+    .replaceAll(path.sep, '/');
+  const loadedConfig: unknown = result.config;
+
+  if (
+    loadedConfig !== undefined &&
+    loadedConfig !== null &&
+    (typeof loadedConfig !== 'object' || Array.isArray(loadedConfig))
+  ) {
+    throw new TypeError(
+      `Configuration file "${configPath}" must contain an object.`
+    );
+  }
+
+  return {
+    config: (loadedConfig ?? {}) as DropdxConfig,
+    configPath,
+  };
 }
 
 /**
@@ -322,7 +334,7 @@ function handleArg(options: CliOptions, argv: string[], index: number): number {
 }
 
 /**
- * Parses configuration file (`.config/dropdx.config.json`) and command-line arguments
+ * Parses configuration file (`.config/dropdx.json`) and command-line arguments
  * into structured options, with CLI arguments taking highest precedence.
  *
  * @param argv - Command line arguments.
@@ -336,7 +348,9 @@ export function parseArgs(
   const options: CliOptions = { ...DEFAULT_OPTIONS };
 
   const customConfigPath = extractConfigArg(argv);
-  const { config, configPath } = loadConfigFile(rootDir, customConfigPath);
+  const { config, configPath } = argv.includes('init')
+    ? { config: {}, configPath: undefined }
+    : loadConfigFile(rootDir, customConfigPath);
   applyConfigToOptions(options, config, configPath);
 
   let i = 0;

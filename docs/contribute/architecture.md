@@ -22,7 +22,7 @@ dropdx is a single-package TypeScript and ECMAScript Module (`"type": "module"`)
 │   ├── cspell/
 │   │   └── custom.txt       # Project-specific CSpell word list
 │   ├── cspell.yml           # CSpell configuration
-│   ├── dropdx.config.json   # dropdx configuration used to release dropdx itself
+│   ├── dropdx.json          # dropdx configuration used to release dropdx itself
 │   └── lefthook.yml         # Lefthook Git hook definitions
 ├── .github/
 │   ├── dependabot.yml       # Weekly dependency and GitHub Actions updates
@@ -36,7 +36,7 @@ dropdx is a single-package TypeScript and ECMAScript Module (`"type": "module"`)
 │   ├── CONTRIBUTING.md      # Main contributing guide
 │   ├── SECURITY.md          # Security policy and vulnerability reporting
 │   └── contribute/          # Detailed contributor documentation
-├── examples/                # Sample dropdx config files (JSON, JSONC, YAML, TOML)
+├── examples/                # Sample dropdx config files (JSON, JSONC, YML, TOML)
 ├── scripts/
 │   ├── update-node.ts       # Syncs `.nvmrc` and `@types/node` with Node.js LTS
 │   └── update-turbo.ts      # Upgrades `turbo` and runs `@turbo/codemod`
@@ -63,6 +63,7 @@ Configuration files follow a consistent placement rule:
 
 - **Files with `.config.` in the name** live in the **repository root**, where their CLIs discover them automatically without extra flags: [`eslint.config.mjs`](../../eslint.config.mjs), [`prettier.config.mjs`](../../prettier.config.mjs), [`commitlint.config.mjs`](../../commitlint.config.mjs), and [`cz.config.mjs`](../../cz.config.mjs).
 - **Tool-name-only configuration files** live in `.config/`: [`.config/cspell.yml`](../../.config/cspell.yml) (with its dictionary at [`.config/cspell/custom.txt`](../../.config/cspell/custom.txt)) and [`.config/lefthook.yml`](../../.config/lefthook.yml). Both CSpell and Lefthook auto-discover their files inside `.config/`.
+- **dropdx configuration** uses cosmiconfig to search `.config/dropdx.{json,jsonc,yml,toml}` before workspace-root `dropdx.config.{json,jsonc,yml,toml}` files. `dropdx init` creates [`.config/dropdx.json`](../../.config/dropdx.json).
 - **Core platform files** stay in the repository root as required by their tools: [`package.json`](../../package.json), [`pnpm-workspace.yaml`](../../pnpm-workspace.yaml), [`tsconfig.json`](../../tsconfig.json), [`tsconfig.build.json`](../../tsconfig.build.json), [`turbo.json`](../../turbo.json), [`.nvmrc`](../../.nvmrc), [`.editorconfig`](../../.editorconfig), and [`.prettierignore`](../../.prettierignore).
 
 ## Build and Package Exports
@@ -95,13 +96,13 @@ In [`package.json`](../../package.json), `bin` and `dist` are listed in `files`.
 ## Source Layout
 
 - [`src/cli.ts`](../../src/cli.ts): CLI entry point and the 7-step release pipeline.
-- [`src/config.ts`](../../src/config.ts): CLI argument parsing and `.config/dropdx.config.*` loading.
+- [`src/config.ts`](../../src/config.ts): CLI argument parsing and cosmiconfig-based configuration loading.
 - [`src/init.ts`](../../src/init.ts): the `dropdx init` command.
 - [`src/engines/`](../../src/engines/): release engine detection and adapters (Changesets, release-it, semantic-release, Lerna, bumpp, standard-version, np, and the built-in engine).
 - [`src/utils/`](../../src/utils/): shared helpers for git, `.npmrc`, the registry, SemVer, package discovery, changelogs, and process execution.
 - [`src/index.ts`](../../src/index.ts): public programmatic API.
 
-dropdx releases itself: `pnpm release` builds the package and runs `bin/dropdx.js` with the repository config in [`.config/dropdx.config.json`](../../.config/dropdx.config.json).
+dropdx releases itself: `pnpm release` builds the package and runs `bin/dropdx.js` with the repository config in [`.config/dropdx.json`](../../.config/dropdx.json).
 
 ## Quality Toolchain and Git Hooks
 

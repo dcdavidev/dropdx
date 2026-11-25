@@ -1,6 +1,6 @@
 /**
  * @file src/init.ts
- * `dropdx init` command: scaffolds a `.config/dropdx.config.json` configuration file.
+ * `dropdx init` command: scaffolds a `.config/dropdx.json` configuration file.
  */
 
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
@@ -48,7 +48,7 @@ export function serializeConfig(config: DropdxConfig): string {
 }
 
 /**
- * Generates a `.config/dropdx.config.json` configuration file stamped with the
+ * Generates a `.config/dropdx.json` configuration file stamped with the
  * currently installed dropdx version.
  *
  * @param options - Parsed CLI options (`configPath` overrides the target path).

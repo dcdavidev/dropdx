@@ -112,7 +112,7 @@ ${purple(bold('Usage:'))}
   ${cyan('dropdx')} [options]
 
 ${purple(bold('Commands:'))}
-  ${cyan('init')}                          Create .config/dropdx.config.json with the current dropdx version
+  ${cyan('init')}                          Create .config/dropdx.json with the current dropdx version
   ${cyan('init --force')}                  Overwrite an existing config file
 
 ${purple(bold('Version Bump Options:'))}
@@ -131,7 +131,7 @@ ${purple(bold('Registry & Publish Options:'))}
   ${cyan('--provenance')}                  Generate a provenance attestation (useful in CI)
 
 ${purple(bold('Engine & Workflow Options:'))}
-  ${cyan('-c, --config <path>')}             Config file (default: .config/dropdx.config.json)
+  ${cyan('-c, --config <path>')}             Config file (default: .config/dropdx.json)
   ${cyan('--engine <name>')}                 Engine: auto, changeset, release-it, semantic-release, lerna, bumpp, standard-version, np, internal
   ${cyan('-d, --dry-run')}                 Simulate checks, bump, build and publish without remote changes
   ${cyan('--skip-build')}                  Skip the package build step

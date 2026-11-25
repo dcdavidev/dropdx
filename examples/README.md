@@ -1,27 +1,38 @@
 # `dropdx` Configuration Examples
 
-`dropdx` automatically discovers configuration files in `.config/` (recommended) or the project root in **JSON**, **JSONC**, **YAML**, and **TOML** formats:
+`dropdx` uses cosmiconfig to search for configuration from the workspace root. It checks these paths in order:
 
-- [`.config/dropdx.config.json`](./dropdx.config.json) _(default)_
-- [`.config/dropdx.config.jsonc`](./dropdx.config.jsonc)
-- [`.config/dropdx.config.yaml`](./dropdx.config.yaml) _(or `.yml`)_
-- [`.config/dropdx.config.toml`](./dropdx.config.toml)
+1. `.config/dropdx.json`
+2. `.config/dropdx.jsonc`
+3. `.config/dropdx.yml`
+4. `.config/dropdx.toml`
+5. `dropdx.config.json`
+6. `dropdx.config.jsonc`
+7. `dropdx.config.yml`
+8. `dropdx.config.toml`
 
-You can also pass a custom path explicitly via `--config <path>` (or `-c <path>`).
+The `.config/dropdx.*` paths are recommended and take precedence over root-level `dropdx.config.*` files. The examples below use root-level names:
+
+- [`dropdx.config.json`](./dropdx.config.json)
+- [`dropdx.config.jsonc`](./dropdx.config.jsonc)
+- [`dropdx.config.yml`](./dropdx.config.yml)
+- [`dropdx.config.toml`](./dropdx.config.toml)
+
+Use `--config <path>` (or `-c <path>`) to load a configuration from a custom location.
 
 ## Generating a Configuration File
 
 Instead of writing the file by hand, scaffold it with the `init` command:
 
 ```bash
-# Generate .config/dropdx.config.json stamped with the current dropdx version
+# Generate .config/dropdx.json stamped with the current dropdx version
 dropdx init
 
 # Overwrite an existing configuration file
 dropdx init --force
 
 # Write to a custom path
-dropdx init --config custom/dropdx.config.json
+dropdx init --config custom/dropdx.json
 ```
 
 Every generated file includes a `version` property matching the version of `dropdx` that created it:

@@ -1,4 +1,4 @@
-# dropdx TOML configuration example (.config/dropdx.config.toml)
+# dropdx TOML configuration example (dropdx.config.toml)
 # version = dropdx version that generated this file (run "dropdx init --force" to refresh)
 version = '0.3.0'
 conventionalCommits = true
