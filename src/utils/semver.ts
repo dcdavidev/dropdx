@@ -112,44 +112,57 @@ export function bumpVersion(
   bumpType: BumpType = 'patch',
   preid = 'rc'
 ): string {
-  const parsed = parseSemVer(currentVersion) || {
-    major: 0,
-    minor: 0,
-    patch: 0,
-    prerelease: [],
-  };
+  const parsed = parseSemVer(currentVersion);
+  if (!parsed) {
+    throw new Error(`Invalid SemVer version "${currentVersion}"`);
+  }
 
   let { major, minor, patch } = parsed;
+  const isPrerelease = parsed.prerelease.length > 0;
 
   if (bumpType === 'major') {
-    major += 1;
+    if (minor !== 0 || patch !== 0 || !isPrerelease) {
+      major += 1;
+    }
     minor = 0;
     patch = 0;
     return `${major}.${minor}.${patch}`;
   }
 
   if (bumpType === 'minor') {
-    minor += 1;
+    if (patch !== 0 || !isPrerelease) {
+      minor += 1;
+    }
     patch = 0;
     return `${major}.${minor}.${patch}`;
   }
 
   if (bumpType === 'prerelease') {
-    if (parsed.prerelease.length > 0) {
-      const lastPart = parsed.prerelease.at(-1);
-      if (typeof lastPart === 'number') {
-        const nextPrerelease = [
-          ...parsed.prerelease.slice(0, -1),
-          lastPart + 1,
-        ];
-        return `${major}.${minor}.${patch}-${nextPrerelease.join('.')}`;
+    if (isPrerelease) {
+      if (preid && parsed.prerelease[0] !== preid) {
+        return `${major}.${minor}.${patch}-${preid}.0`;
       }
+
+      const prerelease = [...parsed.prerelease];
+      const lastIndex = prerelease.length - 1;
+      const lastPart = prerelease[lastIndex];
+
+      if (typeof lastPart === 'number') {
+        prerelease[lastIndex] = lastPart + 1;
+      } else {
+        prerelease.push(0);
+      }
+
+      return `${major}.${minor}.${patch}-${prerelease.join('.')}`;
     }
+
     patch += 1;
     return `${major}.${minor}.${patch}-${preid}.0`;
   }
 
-  patch += 1;
+  if (!isPrerelease) {
+    patch += 1;
+  }
   return `${major}.${minor}.${patch}`;
 }
 

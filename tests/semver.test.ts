@@ -54,6 +54,28 @@ describe('SemVer parser and comparison', () => {
     expect(bumpVersion('1.0.1-rc.0', 'prerelease')).toBe('1.0.1-rc.1');
   });
 
+  it.each([
+    ['2.0.0-rc.1', 'patch', '2.0.0'],
+    ['2.0.0-rc.1', 'minor', '2.0.0'],
+    ['2.0.0-rc.1', 'major', '2.0.0'],
+    ['1.2.0-rc.1', 'minor', '1.2.0'],
+    ['1.0.1-rc.1', 'patch', '1.0.1'],
+  ] as const)(
+    'graduates %s with a %s bump to %s',
+    (currentVersion, bumpType, expectedVersion) => {
+      expect(bumpVersion(currentVersion, bumpType)).toBe(expectedVersion);
+    }
+  );
+
+  it('starts a new prerelease identifier without incrementing the patch', () => {
+    expect(bumpVersion('1.0.0-rc', 'prerelease')).toBe('1.0.0-rc.0');
+    expect(bumpVersion('1.0.0-beta', 'prerelease')).toBe('1.0.0-rc.0');
+  });
+
+  it('throws for invalid SemVer input', () => {
+    expect(() => bumpVersion('v1.2', 'patch')).toThrow(/Invalid SemVer/);
+  });
+
   it('resolves target versions based on registry comparison', () => {
     // Package not on registry: keep local
     const newPkg = resolveTargetVersion('0.0.1', undefined, 'patch', false);
@@ -82,5 +104,13 @@ describe('SemVer parser and comparison', () => {
     const forced = resolveTargetVersion('2.0.0', '1.9.0', 'patch', true);
     expect(forced.targetVersion).toBe('2.0.1');
     expect(forced.bumpNeeded).toBe(true);
+
+    const prerelease = resolveTargetVersion(
+      '2.0.0-rc.1',
+      '2.0.0-rc.1',
+      'patch'
+    );
+    expect(prerelease.targetVersion).toBe('2.0.0');
+    expect(prerelease.bumpNeeded).toBe(true);
   });
 });
